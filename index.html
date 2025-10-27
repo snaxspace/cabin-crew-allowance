@@ -13,14 +13,14 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.
 .banner{background:#fff;border-bottom:1px solid var(--line)}
 .banner .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;padding:14px 0}
-/* logo white bg, subtle border */
+/* white square behind emoji */
 .brand .logo{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--red);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--line)}
 .brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:.2px}
 .content{display:grid;gap:16px;padding:16px 0}
 .card{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
 .card h2{font-size:16px;font-weight:700;margin:0 0 8px}
 
-/* KPI cards (Airasia red) */
+/* KPI totals in AirAsia red */
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark)}
 .kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95}
@@ -139,6 +139,15 @@ tbody tr:hover{background:#fcfcfc}
         <div id="deductNote" style="margin-top:4px;color:#fff;opacity:.9;font-size:12px"></div>
       </div>
     </section>
+
+    <!-- Visitor badge line -->
+    <div style="text-align:center;margin-top:12px;color:#555;font-size:13px;">
+      🧍‍♂️ Visitors:
+      <img src="https://visitor-badge.laobi.icu/badge?page_id=snaxspace.cabin-crew-allowance"
+           alt="visitor badge"
+           style="vertical-align:middle;margin-left:4px;">
+    </div>
+
   </main>
 
   <footer class="footer">
@@ -160,7 +169,7 @@ const FLIGHTS = [
 // Layover extra amounts (over 24H baseline) for non-DEL
 const LAYOVER_EXTRA = { "24": 0, "48": 2880, "72": 5670 };
 
-// State lives only in memory (no localStorage)
+// No persistence across refresh
 let chosen = [];
 let rowCounter = 0;
 let sickMode = 'none'; // 'none' | '1' | '2+'
@@ -265,7 +274,7 @@ function addSelectorRow(parent){
       layLabel.style.display = 'inline-block';
       layoverSelect.style.display = 'inline-block';
       quickturn.style.display = 'none';
-      layoverSelect.value = '24';
+      layoverSelect.value = '24'; // default to 24H when a non-DEL flight is chosen
     }
     updateEntryForRow(code);
   });
