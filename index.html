@@ -13,14 +13,14 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.
 .banner{background:#fff;border-bottom:1px solid var(--line)}
 .banner .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;padding:14px 0}
-.brand .logo{width:36px;height:36px;border-radius:10px;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(218,13,24,.25)}
+/* logo white bg, subtle border */
+.brand .logo{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--red);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--line)}
 .brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:.2px}
-.badge{font-size:11px;background:var(--soft);color:var(--text);padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
 .content{display:grid;gap:16px;padding:16px 0}
 .card{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
 .card h2{font-size:16px;font-weight:700;margin:0 0 8px}
 
-/* Totals (Airasia red) */
+/* KPI cards (Airasia red) */
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark)}
 .kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95}
@@ -46,7 +46,7 @@ select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%
 /* Tables */
 .table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 table{width:100%;border-collapse:collapse}
-thead th{background:#fafafa;color:var(--text);font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+thead th{background:#fafafa;color:#000;font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
 th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:hover{background:#fcfcfc}
 
@@ -59,7 +59,7 @@ tbody tr:hover{background:#fcfcfc}
     <div class="wrap">
       <div class="brand">
         <div class="logo">✈️</div>
-        <h1>Snax Cabin Crew Allowance Calculator <span class="badge">Soft theme · 10 selectors</span></h1>
+        <h1>Snax Cabin Crew Allowance Calculator</h1>
       </div>
     </div>
   </div>
@@ -135,7 +135,8 @@ tbody tr:hover{background:#fcfcfc}
       <div class="card kpi">
         <h3>Total Allowance</h3>
         <div id="totalAllowance" class="value">0 THB</div>
-        <div id="deductNote" class="smallnote" style="margin-top:4px;opacity:.9"></div>
+        <!-- white note with opacity .9 -->
+        <div id="deductNote" style="margin-top:4px;color:#fff;opacity:.9;font-size:12px"></div>
       </div>
     </section>
   </main>
@@ -159,7 +160,7 @@ const FLIGHTS = [
 // Layover extra amounts (over 24H baseline) for non-DEL
 const LAYOVER_EXTRA = { "24": 0, "48": 2880, "72": 5670 };
 
-const STORAGE_KEY = "snax.dropdown.softtheme.10.compactLayover.sick";
+// State lives only in memory (no localStorage)
 let chosen = [];
 let rowCounter = 0;
 let sickMode = 'none'; // 'none' | '1' | '2+'
@@ -176,14 +177,8 @@ function parseBlockToMinutes(s){
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
 function optionLabel(f){ return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(f.allowance)} THB`; }
-function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({chosen, sickMode})); }
-function load(){ try{ const v = JSON.parse(localStorage.getItem(STORAGE_KEY)); return v || {chosen:[],sickMode:'none'} }catch(e){ return {chosen:[],sickMode:'none'}; } }
 
 function init(){
-  const saved = load();
-  chosen = saved.chosen || [];
-  sickMode = saved.sickMode || 'none';
-
   renderSelectors(10);
   renderList();
   compute();
@@ -193,8 +188,7 @@ function init(){
   $('#copyTotals').addEventListener('click', copyTotals);
 
   const sSel = document.getElementById('sickSelect');
-  sSel.value = sickMode;
-  sSel.addEventListener('change', () => { sickMode = sSel.value; persist(); compute(); });
+  sSel.addEventListener('change', () => { sickMode = sSel.value; compute(); });
 }
 
 function renderSelectors(n){
@@ -255,7 +249,7 @@ function addSelectorRow(parent){
       _rowId: rowId
     };
     chosen.push(entry);
-    persist(); renderList(); compute();
+    renderList(); compute();
     resetBtn.disabled = false;
     select.dataset.addedIndex = String(chosen.length-1);
   }
@@ -271,7 +265,7 @@ function addSelectorRow(parent){
       layLabel.style.display = 'inline-block';
       layoverSelect.style.display = 'inline-block';
       quickturn.style.display = 'none';
-      layoverSelect.value = '24'; // default to 24H when a non-DEL flight is chosen
+      layoverSelect.value = '24';
     }
     updateEntryForRow(code);
   });
@@ -285,7 +279,7 @@ function addSelectorRow(parent){
   resetBtn.addEventListener('click', () => {
     const idx = parseInt(select.dataset.addedIndex || '-1',10);
     if(!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId){
-      chosen.splice(idx,1); persist(); renderList(); compute();
+      chosen.splice(idx,1); renderList(); compute();
     }
     select.value=''; layoverSelect.value='24';
     select.dataset.addedIndex=undefined; resetBtn.disabled=true;
@@ -313,7 +307,7 @@ function renderList(){
       <td><button class="btn small" data-idx="${idx}">Remove</button></td>`;
     tr.querySelector('button').addEventListener('click', (e) => {
       const i = +e.currentTarget.getAttribute('data-idx');
-      chosen.splice(i,1); persist(); renderList(); compute();
+      chosen.splice(i,1); renderList(); compute();
     });
     tbody.appendChild(tr);
   });
@@ -353,7 +347,7 @@ function renderSummary(){
 
 function clearAll(){
   if(!confirm('Remove all selected flights?')) return;
-  chosen = []; persist(); renderList(); compute();
+  chosen = []; renderList(); compute();
   document.querySelectorAll('#selectors .selector-row').forEach(row => {
     const selects = row.querySelectorAll('select');
     const [flightSel, laySel] = selects;
