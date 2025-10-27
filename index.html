@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>✈️ Snax Cabin Crew Allowance Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; 
+  --text:#111;
+  --muted:#666;
+  --line:#e9e9e9;
+  --red:#DA0D18;     /* AirAsia red */
+  --red-dark:#A00A10;
+  --soft:#f8f8f8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.5 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px}
+
+/* Top banner */
+.banner{background:#fff;border-bottom:1px solid var(--line)}
+.banner .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;padding:14px 0}
+.brand .logo{width:36px;height:36px;border-radius:10px;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(218,13,24,.25)}
+.brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:.2px}
+.badge{font-size:11px;background:var(--soft);color:var(--text);padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+
+.content{display:grid;gap:16px;padding:16px 0}
+
+/* Cards */
+.card{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
+.card h2{font-size:16px;font-weight:700;margin:0 0 8px}
+
+/* Totals (Airasia red) */
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark)}
+.kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95}
+.value{font-size:28px;font-weight:700}
+
+/* Selectors */
+select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%23666" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600}
+.selector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.selector-row{display:flex;gap:8px;align-items:center}
+.selector-row .mini{background:#fff;color:var(--text);border:1px solid var(--line);padding:8px 10px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600}
+.selector-row .mini:hover{border-color:#ccc}
+
+/* Buttons */
+.btn{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700}
+.btn:hover{border-color:#ccc}
+.btn.small{padding:8px 10px;font-size:13px}
+.btn.outline{background:#fff}
+.btn.danger{border-color:#f2c4c4}
+.btn.danger:hover{border-color:#e89a9a}
+
+/* Table */
+.table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+table{width:100%;border-collapse:collapse}
+thead th{background:#fafafa;color:var(--text);font-weight:700;border-bottom:1px solid var(--line);font-size:13px}
+th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:hover{background:#fcfcfc}
+td .pill{display:inline-block;background:#f2f2f2;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:600}
+
+/* Footer */
+.footer{color:#555;border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo">✈️</div>
+        <h1>Snax Cabin Crew Allowance Calculator <span class="badge">Soft theme · 10 selectors</span></h1>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap content">
+    <section class="card">
+      <h2>Select Flights</h2>
+      <div id="selectors" class="selector-grid"></div>
+      <p style="color:#777;font-size:12px;margin:8px 0 0">Choose up to 10 flights. Use <b>Reset</b> on a slot to change the choice.</p>
+    </section>
+
+    <section class="card">
+      <h2>Selected Flights</h2>
+      <div class="table-wrap">
+        <table id="listTable">
+          <thead>
+            <tr>
+              <th style="width:25%">Flight</th>
+              <th style="width:25%">Block Hours</th>
+              <th style="width:25%">Allowance (THB)</th>
+              <th style="width:25%"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="clearAll" class="btn danger small">Clear All</button>
+        <button id="exportCsv" class="btn small">Export CSV</button>
+      </div>
+    </section>
+
+    <section class="kpis">
+      <div class="card kpi">
+        <h3>Total Block Hours</h3>
+        <div id="totalHours" class="value">0:00 H</div>
+      </div>
+      <div class="card kpi">
+        <h3>Total Allowance</h3>
+        <div id="totalAllowance" class="value">0 THB</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">Snax — Soft white + bold black text · Totals in AirAsia red</div>
+  </footer>
+
+<script>
+// Flight data
+const FLIGHTS = [
+  { code: "DEL", block: "8:35", allowance: 4290 },
+  { code: "PVG", block: "8.55", allowance: 7230 },
+  { code: "ICN", block: "11.45", allowance: 8230 },
+  { code: "KIX", block: "12.15", allowance: 8400 },
+  { code: "NGO", block: "12.30", allowance: 8490 },
+  { code: "NRT", block: "13.40", allowance: 8890 },
+  { code: "CTS", block: "15.00", allowance: 9370 }
+];
+
+// State
+const STORAGE_KEY = "snax.dropdown.softtheme.10.banner";
+let chosen = load() || [];
+let rowCounter = 0;
+
+function $(s){ return document.querySelector(s); }
+
+function init(){
+  renderSelectors(10);
+  renderList();
+  compute();
+  $('#clearAll').addEventListener('click', clearAll);
+  $('#exportCsv').addEventListener('click', exportCsv);
+}
+
+function renderSelectors(n){
+  const wrap = $('#selectors');
+  wrap.innerHTML = '';
+  for(let i=0;i<n;i++){ addSelectorRow(wrap); }
+}
+
+function addSelectorRow(parent){
+  const rowId = ++rowCounter;
+  const row = document.createElement('div');
+  row.className = 'selector-row';
+
+  const select = document.createElement('select');
+  select.innerHTML = '<option value="">Select a flight…</option>' + FLIGHTS.map(f => `<option value="${f.code}">${f.code}</option>`).join('');
+  select.dataset.rowId = rowId;
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'mini';
+  resetBtn.textContent = 'Reset';
+  resetBtn.disabled = true;
+
+  select.addEventListener('change', () => {
+    const code = select.value;
+    if(!code) return;
+    const data = FLIGHTS.find(f => f.code === code);
+    if(!data) return;
+
+    // if this row had an entry, remove the old one first
+    if(select.dataset.addedIndex !== undefined){
+      const idx = parseInt(select.dataset.addedIndex,10);
+      if(!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId){
+        chosen.splice(idx,1);
+      }
+    }
+
+    const entry = { code: data.code, block: data.block, allowance: data.allowance, _rowId: rowId };
+    chosen.push(entry);
+    persist();
+    renderList();
+    compute();
+
+    resetBtn.disabled = false;
+    select.dataset.addedIndex = String(chosen.length - 1);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    const idx = parseInt(select.dataset.addedIndex || '-1',10);
+    if(!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId){
+      chosen.splice(idx,1);
+      persist();
+      renderList();
+      compute();
+    }
+    select.value = '';
+    select.dataset.addedIndex = undefined;
+    resetBtn.disabled = true;
+  });
+
+  row.appendChild(select);
+  row.appendChild(resetBtn);
+  parent.appendChild(row);
+}
+
+function renderList(){
+  const tbody = document.querySelector('#listTable tbody');
+  tbody.innerHTML = '';
+  chosen.forEach((item, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = \`
+      <td><span class="pill">\${item.code}</span></td>
+      <td>\${formatBlock(item.block)}</td>
+      <td>\${fmtTHB(item.allowance)}</td>
+      <td><button class="btn small" data-idx="\${idx}">Remove</button></td>
+    \`;
+    tr.querySelector('button').addEventListener('click', (e) => {
+      const i = +e.currentTarget.getAttribute('data-idx');
+      chosen.splice(i,1);
+      persist();
+      renderList();
+      compute();
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function clearAll(){
+  if(!confirm('Remove all selected flights?')) return;
+  chosen = [];
+  persist();
+  renderList();
+  compute();
+  // reset selectors
+  document.querySelectorAll('#selectors select').forEach(sel => {
+    sel.value = '';
+    sel.dataset.addedIndex = undefined;
+  });
+  document.querySelectorAll('#selectors .mini').forEach(btn => btn.disabled = true);
+}
+
+function exportCsv(){
+  const header = 'code,block,allowance\n';
+  const body = chosen.map(c => [c.code, formatBlock(c.block), c.allowance].join(',')).join('\n');
+  const blob = new Blob([header+body], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'selected-flights.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function compute(){
+  let totalMinutes = 0;
+  let totalAllowance = 0;
+  chosen.forEach(item => {
+    totalMinutes += parseBlockToMinutes(item.block);
+    totalAllowance += +item.allowance || 0;
+  });
+  $('#totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
+  $('#totalAllowance').textContent = fmtTHB(totalAllowance);
+}
+
+function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits:0}).format(n) + ' THB'; }
+
+// Accepts "H:MM" or "H.MM" where .MM is minutes (e.g., 8.55 => 8h55m)
+function parseBlockToMinutes(s){
+  if(typeof s === 'number'){ return Math.round(s * 60); }
+  if(!s) return 0;
+  s = String(s).trim();
+  if(s.includes(':')){
+    const [h,m] = s.split(':').map(v => parseInt(v,10) || 0);
+    return h*60 + m;
+  } else if(s.includes('.')){
+    const [h,mm] = s.split('.');
+    const hours = parseInt(h,10) || 0;
+    const minutes = parseInt(mm,10) || 0;
+    return hours*60 + minutes;
+  } else {
+    const hours = parseInt(s,10) || 0;
+    return hours*60;
+  }
+}
+
+function minutesToHMM(mins){
+  const h = Math.floor(mins/60);
+  const m = mins % 60;
+  return h + ':' + String(m).padStart(2,'0');
+}
+function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
+
+function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(chosen)); }
+function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[] }catch(e){ return []; } }
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
