@@ -68,6 +68,17 @@ tbody tr:hover{background:#fcfcfc}
     <section class="card">
       <h2>Select Flights</h2>
       <div id="selectors" class="selector-grid"></div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+        <label class="small" for="sickSelect">Sick Leave:</label>
+        <select id="sickSelect">
+          <option value="none" selected>No sick leave</option>
+          <option value="1">1 day sick leave</option>
+          <option value="2+">2 days + sick leave</option>
+        </select>
+        <span id="sickInfo" class="smallnote"></span>
+      </div>
+
       <p class="smallnote">Choose your flights. For non‑DEL flights, set a <b>Layover</b> of <b>24H</b> (default), <b>48H</b> (+2,880), or <b>72H</b> (+5,670). DEL is <b>Quickturn</b>.</p>
     </section>
 
@@ -124,6 +135,7 @@ tbody tr:hover{background:#fcfcfc}
       <div class="card kpi">
         <h3>Total Allowance</h3>
         <div id="totalAllowance" class="value">0 THB</div>
+        <div id="deductNote" class="smallnote" style="margin-top:4px;opacity:.9"></div>
       </div>
     </section>
   </main>
@@ -147,9 +159,10 @@ const FLIGHTS = [
 // Layover extra amounts (over 24H baseline) for non-DEL
 const LAYOVER_EXTRA = { "24": 0, "48": 2880, "72": 5670 };
 
-const STORAGE_KEY = "snax.dropdown.softtheme.10.compactLayover";
-let chosen = load() || [];
+const STORAGE_KEY = "snax.dropdown.softtheme.10.compactLayover.sick";
+let chosen = [];
 let rowCounter = 0;
+let sickMode = 'none'; // 'none' | '1' | '2+'
 
 function $(s){ return document.querySelector(s); }
 function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits:0}).format(n) + ' THB'; }
@@ -163,16 +176,25 @@ function parseBlockToMinutes(s){
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
 function optionLabel(f){ return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(f.allowance)} THB`; }
-function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(chosen)); }
-function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[] }catch(e){ return []; } }
+function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({chosen, sickMode})); }
+function load(){ try{ const v = JSON.parse(localStorage.getItem(STORAGE_KEY)); return v || {chosen:[],sickMode:'none'} }catch(e){ return {chosen:[],sickMode:'none'}; } }
 
 function init(){
+  const saved = load();
+  chosen = saved.chosen || [];
+  sickMode = saved.sickMode || 'none';
+
   renderSelectors(10);
   renderList();
   compute();
+
   $('#clearAll').addEventListener('click', clearAll);
   $('#exportCsv').addEventListener('click', exportCsv);
   $('#copyTotals').addEventListener('click', copyTotals);
+
+  const sSel = document.getElementById('sickSelect');
+  sSel.value = sickMode;
+  sSel.addEventListener('change', () => { sickMode = sSel.value; persist(); compute(); });
 }
 
 function renderSelectors(n){
@@ -335,13 +357,14 @@ function clearAll(){
   document.querySelectorAll('#selectors .selector-row').forEach(row => {
     const selects = row.querySelectorAll('select');
     const [flightSel, laySel] = selects;
-    if(flightSel){ flightSel.value=''; }
+    if(flightSel){ flightSel.value=''; flightSel.dataset.addedIndex=undefined; }
     if(laySel){ laySel.value='24'; laySel.style.display='inline-block'; }
     const lbl = row.querySelector('label.small'); if(lbl){ lbl.style.display='inline-block'; }
     const qt = row.querySelector('.pill'); if(qt){ qt.style.display='none'; }
     const reset = row.querySelector('.mini'); if(reset){ reset.disabled=true; }
-    if(flightSel) flightSel.dataset.addedIndex = undefined;
   });
+  const sSel = document.getElementById('sickSelect');
+  sSel.value = 'none'; sickMode = 'none'; document.getElementById('sickInfo').textContent=''; document.getElementById('deductNote').textContent='';
 }
 
 function exportCsv(){
@@ -362,8 +385,16 @@ function copyTotals(){
 function compute(){
   let totalMinutes=0, totalAllowance=0;
   chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += +it.allowance||0; });
+  const hours = totalMinutes/60;
+  let deduction = 0;
+  if(sickMode==='1') deduction = Math.round(hours * 10);
+  else if(sickMode==='2+') deduction = Math.round(hours * 100);
+  const finalAllowance = Math.max(0, totalAllowance - deduction);
   document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
-  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(totalAllowance) + ' THB';
+  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
+  const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
+  document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
+  document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
   renderSummary();
 }
 
