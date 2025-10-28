@@ -89,7 +89,7 @@ tbody tr:hover{background:#fcfcfc}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
           <h2 style="margin:0">Selected Flights</h2>
           <div class="tools" style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="savePng" class="btn small">Save as Picture</button>
+            <button id="savePng" class="btn small">Save / Share Image</button>
             <button id="exportCsv" class="btn small">Export CSV</button>
             <button id="clearAll" class="btn danger small">Clear All</button>
           </div>
@@ -174,12 +174,14 @@ function parseBlockToMinutes(s){
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
 
+// Rank-aware option label
 function optionLabel(f){
   const bonus = RANK_BONUS[rankMode] || 0;
   const displayAllowance = (Number(f.allowance) || 0) + bonus;
   return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(displayAllowance)} THB`;
 }
 
+// Refresh dropdown labels to reflect current rank
 function refreshFlightOptionLabels(){
   document.querySelectorAll('#selectors .selector-row select:first-child').forEach(sel => {
     const current = sel.value;
@@ -211,7 +213,7 @@ function init(){
   rSel.addEventListener('change', () => {
     rankMode = rSel.value;
     updateRankDisplay();
-    refreshFlightOptionLabels();
+    refreshFlightOptionLabels(); // reflect rank in dropdown options
     renderList();
     compute();
   });
@@ -374,6 +376,50 @@ function exportCsv(){
   const a = document.createElement('a'); a.href=url; a.download='selected-flights.csv'; a.click(); URL.revokeObjectURL(url);
 }
 
+async function saveAsPicture(){
+  const target = document.getElementById('captureArea');
+  try {
+    const canvas = await html2canvas(target, { backgroundColor: '#ffffff', scale: 2 });
+    await new Promise((resolve, reject) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) return reject(new Error('Canvas toBlob failed.'));
+        const file = new File([blob], 'snax-allowance.png', { type: 'image/png' });
+
+        // Try native Share first (Android Chrome, iOS 16.4+ Safari, etc.)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'Snax Allowance', text: 'Selected flights & totals' });
+            return resolve();
+          } catch (e) {
+            // User canceled or share failed; continue to fallback
+          }
+        }
+
+        // Fallback: download link (works on Android/desktop)
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'snax-allowance.png';
+
+        // iOS Safari older behavior: open in new tab → long-press Save Image
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+          window.open(url, '_blank', 'noopener');
+        } else {
+          a.click();
+        }
+        URL.revokeObjectURL(url);
+        resolve();
+      }, 'image/png');
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Could not generate image. Try again.');
+  }
+}
+
+function renderSummary(){ /* kept for future extension if you re-enable per-destination summary */ }
+
 function compute(){
   let totalMinutes=0, totalAllowance=0;
   chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
@@ -387,19 +433,6 @@ function compute(){
   const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
   document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
   document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
-}
-
-function saveAsPicture(){
-  const target = document.getElementById('captureArea');
-  html2canvas(target, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'snax-allowance.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }).catch(err => {
-    alert('Could not generate image. Please try again.');
-    console.error(err);
-  });
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
