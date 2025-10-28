@@ -65,7 +65,6 @@ tbody tr:hover{background:#fcfcfc}
             <option value="CC" selected>CC</option>
             <option value="PUR/SCC">PUR/SCC</option>
           </select>
-          <span id="rankInfo" class="smallnote"></span>
         </div>
       </div>
     </section>
@@ -183,7 +182,7 @@ function optionLabel(f){ return `${f.code} — ${formatBlock(f.block)} · ${new 
 function rowAllowance(entry){
   const layExtra = entry.layover === 'QT' ? 0 : (LAYOVER_EXTRA[entry.layover] || 0);
   const rankExtra = RANK_BONUS[rankMode] || 0;
-  return (entry.baseAllowance || 0) + layExtra + rankExtra;
+  return (Number(entry.baseAllowance) || 0) + layExtra + rankExtra;
 }
 
 function init(){
@@ -199,16 +198,10 @@ function init(){
   sSel.addEventListener('change', () => { sickMode = sSel.value; compute(); });
 
   const rSel = document.getElementById('rankSelect');
-  rSel.addEventListener('change', () => { rankMode = rSel.value; updateRankInfo(); updateRankDisplay(); renderList(); compute(); });
-  updateRankInfo();
+  rSel.addEventListener('change', () => { rankMode = rSel.value; updateRankDisplay(); renderList(); compute(); });
   updateRankDisplay();
 
   document.getElementById('savePng').addEventListener('click', saveAsPicture);
-}
-
-function updateRankInfo(){
-  const info = document.getElementById('rankInfo');
-  if(info) info.textContent = '';
 }
 
 function updateRankDisplay(){
@@ -252,7 +245,6 @@ function addSelectorRow(parent){
   function updateEntryForRow(code){
     const data = FLIGHTS.find(f => f.code === code);
     if(!data) return;
-    // Remove any previous entry for this row
     if (select.dataset.addedIndex !== undefined) {
       const idx = parseInt(select.dataset.addedIndex, 10);
       if (!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId) {
@@ -268,7 +260,7 @@ function addSelectorRow(parent){
     const entry = {
       code: data.code,
       block: data.block,
-      baseAllowance: data.allowance,
+      baseAllowance: Number(data.allowance),
       layover: lay,
       _rowId: rowId
     };
