@@ -6,39 +6,91 @@
 <title>✈️ Snax Cabin Crew Allowance Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#ffffff;--text:#111;--muted:#666;--line:#e9e9e9;--red:#DA0D18;--red-dark:#A00A10}
+/* ---------- THEME TOKENS ---------- */
+:root{
+  --bg:#ffffff;
+  --card:#ffffff;
+  --text:#101114;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --red:#DA0D18;
+  --red-dark:#A00A10;
+  --pill:#f2f2f2;
+  --btn:#ffffff;
+  --btn-text:#101114;
+  --shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+:root[data-theme="dark"]{
+  --bg:#0b0c10;
+  --card:#121317;
+  --text:#eef0f3;
+  --muted:#9aa3af;
+  --line:#22252b;
+  --red:#DA0D18;     /* keep AirAsia red for brand pop */
+  --red-dark:#8b070c;
+  --pill:#1a1c22;
+  --btn:#1a1c22;
+  --btn-text:#eef0f3;
+  --shadow:0 2px 10px rgba(0,0,0,.25);
+}
+
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.5 'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial}
+
+/* ---------- LAYOUT ---------- */
 .wrap{max-width:960px;margin:0 auto;padding:0 16px}
-.banner{background:#fff;border-bottom:1px solid var(--line)}
+.banner{background:var(--card);border-bottom:1px solid var(--line)}
 .banner .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;padding:14px 0}
-.brand .logo{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--red);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--line)}
+.brand .logo{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--red);font-weight:700;box-shadow:var(--shadow);border:1px solid var(--line)}
 .brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:.2px}
 .content{display:grid;gap:16px;padding:16px 0}
-.card{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
+.card{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
 .card h2{font-size:16px;font-weight:700;margin:0 0 8px}
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark)}
-.kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95}
-.value{font-size:28px;font-weight:700}
-label.small{font-size:12px;color:#666;margin-right:6px}
-.smallnote{font-size:12px;color:#555}
-select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%23666" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600}
-.selector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark);border-radius:14px}
+.kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95;padding:14px 14px 0}
+.value{font-size:28px;font-weight:700;padding:0 14px 14px}
+label.small{font-size:12px;color:var(--muted);margin-right:6px}
+.smallnote{font-size:12px;color:var(--muted)}
+select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg fill="%239AA3AF" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600;min-width:180px}
+.selector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
 .selector-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.selector-row .mini{background:#fff;color:var(--text);border:1px solid var(--line);padding:8px 10px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600}
+.selector-row .mini{background:var(--btn);color:var(--btn-text);border:1px solid var(--line);padding:8px 10px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600}
 .selector-row .mini:hover{border-color:#ccc}
-.pill{display:inline-block;background:#f2f2f2;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
-.btn{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700}
+.pill{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.btn{background:var(--btn);color:var(--btn-text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:700;min-width:160px}
 .btn:hover{border-color:#ccc}
-.btn.small{padding:8px 10px;font-size:13px}
-.table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+.btn.small{padding:10px 12px;font-size:14px}
+.table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:var(--card)}
 table{width:100%;border-collapse:collapse}
-thead th{background:#fafafa;color:#000;font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+thead th{background:rgba(0,0,0,0.02);color:var(--text);font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+:root[data-theme="dark"] thead th{background:#171a20}
 th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
-tbody tr:hover{background:#fcfcfc}
-.footer{color:#555;border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
+tbody tr:hover{background:rgba(0,0,0,0.02)}
+:root[data-theme="dark"] tbody tr:hover{background:#15171c}
+.footer{color:var(--muted);border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
+
+/* ---------- MOBILE TWEAKS ---------- */
+@media (max-width:560px){
+  .brand h1{font-size:16px}
+  .kpis{grid-template-columns:1fr}
+  select{min-width:0;width:100%}
+  .selector-row{align-items:stretch}
+  .selector-row > *{flex:1 1 auto}
+  .tools.center-mobile{justify-content:center}
+  .btn{width:100%}
+  .value{font-size:26px}
+}
+
+/* ---------- DARK MODE TOGGLE (switch) ---------- */
+.switch{position:relative;display:inline-block;width:54px;height:30px;vertical-align:middle}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#d1d5db;border:1px solid #c7ccd3;transition:.2s;border-radius:999px}
+.slider:before{position:absolute;content:"";height:22px;width:22px;left:4px;top:3px;background:white;transition:.2s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+input:checked + .slider{background:#111827;border-color:#0b0c10}
+input:checked + .slider:before{transform:translateX(24px)}
 </style>
 </head>
 <body>
@@ -54,13 +106,22 @@ tbody tr:hover{background:#fcfcfc}
   <main class="wrap content">
     <section class="card">
       <h2>Settings</h2>
-      <div class="tools" style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="tools" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
         <div style="display:flex;align-items:center;gap:8px;">
           <label class="small" for="rankSelect">Rank:</label>
           <select id="rankSelect">
             <option value="CC" selected>CC</option>
             <option value="PUR/SCC">PUR/SCC</option>
           </select>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <div style="display:flex;align-items:center;gap:10px;">
+          <label class="small" for="darkToggle">Dark mode:</label>
+          <label class="switch" title="Toggle dark mode">
+            <input type="checkbox" id="darkToggle">
+            <span class="slider"></span>
+          </label>
         </div>
       </div>
     </section>
@@ -84,11 +145,11 @@ tbody tr:hover{background:#fcfcfc}
 
     <div id="captureArea">
       <section class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
           <h2 style="margin:0">Selected Flights</h2>
         </div>
         <!-- Single centered action button -->
-        <div class="tools" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <div class="tools center-mobile" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px">
           <button id="savePng" class="btn small">Save / Share Image</button>
         </div>
         <div class="table-wrap" style="margin-top:8px;">
@@ -127,7 +188,7 @@ tbody tr:hover{background:#fcfcfc}
       </section>
     </div>
 
-    <div style="text-align:center;margin-top:12px;color:#555;font-size:13px;">
+    <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
       🧍‍♂️ Visitors:
       <img src="https://visitor-badge.laobi.icu/badge?page_id=snaxspace.cabin-crew-allowance"
            alt="visitor badge"
@@ -141,6 +202,7 @@ tbody tr:hover{background:#fcfcfc}
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
+/* ---------- DATA ---------- */
 const FLIGHTS = [
   { code: "DEL", block: "8:35", allowance: 4290 },
   { code: "PVG", block: "8.55", allowance: 7230 },
@@ -150,15 +212,16 @@ const FLIGHTS = [
   { code: "NRT", block: "13.40", allowance: 8890 },
   { code: "CTS", block: "15.00", allowance: 9370 }
 ];
-
 const LAYOVER_EXTRA = { "24": 0, "48": 2880, "72": 5670 };
 const RANK_BONUS   = { "CC": 0, "PUR/SCC": 500 };
 
+/* ---------- STATE ---------- */
 let chosen = [];
 let rowCounter = 0;
 let sickMode = 'none';
 let rankMode = 'CC';
 
+/* ---------- UTILS ---------- */
 function $(s){ return document.querySelector(s); }
 function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits:0}).format(n) + ' THB'; }
 function parseBlockToMinutes(s){
@@ -171,14 +234,12 @@ function parseBlockToMinutes(s){
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
 
-// Rank-aware option label
+/* ---------- LABELS ---------- */
 function optionLabel(f){
   const bonus = RANK_BONUS[rankMode] || 0;
   const displayAllowance = (Number(f.allowance) || 0) + bonus;
   return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(displayAllowance)} THB`;
 }
-
-// Refresh dropdown labels to reflect current rank
 function refreshFlightOptionLabels(){
   document.querySelectorAll('#selectors .selector-row select:first-child').forEach(sel => {
     const current = sel.value;
@@ -188,48 +249,53 @@ function refreshFlightOptionLabels(){
   });
 }
 
+/* ---------- ROW & TOTALS ---------- */
 function rowAllowance(entry){
   const layExtra = entry.layover === 'QT' ? 0 : (LAYOVER_EXTRA[entry.layover] || 0);
   const rankExtra = RANK_BONUS[rankMode] || 0;
   return (Number(entry.baseAllowance) || 0) + layExtra + rankExtra;
 }
 
-function init(){
-  renderSelectors(10);
-  renderList();
-  compute();
-
-  document.getElementById('savePng').addEventListener('click', saveAsPicture);
-
-  const sSel = document.getElementById('sickSelect');
-  sSel.addEventListener('change', () => { sickMode = sSel.value; compute(); });
-
-  const rSel = document.getElementById('rankSelect');
-  rSel.addEventListener('change', () => {
-    rankMode = rSel.value;
-    updateRankDisplay();
-    refreshFlightOptionLabels(); // reflect rank in dropdown options
-    renderList();
-    compute();
+function renderList(){
+  const tbody = document.querySelector('#listTable tbody'); tbody.innerHTML='';
+  chosen.forEach((item, idx) => {
+    const layLabel = item.layover === 'QT' ? 'Quickturn' : (item.layover + ' H');
+    const tr = document.createElement('tr');
+    const allowance = rowAllowance(item);
+    tr.innerHTML = `
+      <td><span class="pill">${item.code}</span></td>
+      <td>${layLabel}</td>
+      <td>${formatBlock(item.block)}</td>
+      <td>${fmtTHB(allowance)}</td>
+      <td><button class="btn small" data-idx="${idx}">Remove</button></td>`;
+    tr.querySelector('button').addEventListener('click', (e) => {
+      const i = +e.currentTarget.getAttribute('data-idx');
+      chosen.splice(i,1); renderList(); compute();
+    });
+    tbody.appendChild(tr);
   });
-
-  // initialize from current controls
-  rankMode = rSel.value;
-  sickMode = sSel.value;
-  updateRankDisplay();
-  refreshFlightOptionLabels();
 }
 
-function updateRankDisplay(){
-  const el = document.getElementById('rankDisplay');
-  if(el){ el.textContent = 'Rank: ' + rankMode; }
+function compute(){
+  let totalMinutes=0, totalAllowance=0;
+  chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
+  const hours = totalMinutes/60;
+  let deduction = 0;
+  if(sickMode==='1') deduction = Math.round(hours * 10);
+  else if(sickMode==='2+') deduction = Math.round(hours * 100);
+  const finalAllowance = Math.max(0, totalAllowance - deduction);
+  document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
+  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
+  const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
+  document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
+  document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
 }
 
+/* ---------- SELECTORS ---------- */
 function renderSelectors(n){
   const wrap = $('#selectors'); wrap.innerHTML='';
   for(let i=0;i<n;i++){ addSelectorRow(wrap); }
 }
-
 function addSelectorRow(parent){
   const rowId = ++rowCounter;
   const row = document.createElement('div');
@@ -326,29 +392,7 @@ function addSelectorRow(parent){
   parent.appendChild(row);
 }
 
-function renderList(){
-  const tbody = document.querySelector('#listTable tbody'); tbody.innerHTML='';
-  chosen.forEach((item, idx) => {
-    const layLabel = item.layover === 'QT' ? 'Quickturn' : (item.layover + ' H');
-    const tr = document.createElement('tr');
-    const allowance = rowAllowance(item);
-    tr.innerHTML = `
-      <td><span class="pill">${item.code}</span></td>
-      <td>${layLabel}</td>
-      <td>${formatBlock(item.block)}</td>
-      <td>${fmtTHB(allowance)}</td>
-      <td><button class="btn small" data-idx="${idx}">Remove</button></td>`;
-    tr.querySelector('button').addEventListener('click', (e) => {
-      const i = +e.currentTarget.getAttribute('data-idx');
-      chosen.splice(i,1); renderList(); compute();
-    });
-    tbody.appendChild(tr);
-  });
-}
-
-function clearAll(){ /* removed: no UI */ }
-function exportCsv(){ /* removed: no UI */ }
-
+/* ---------- ACTIONS ---------- */
 async function saveAsPicture(){
   const target = document.getElementById('captureArea');
   try {
@@ -383,25 +427,42 @@ async function saveAsPicture(){
   }
 }
 
-function compute(){
-  let totalMinutes=0, totalAllowance=0;
-  chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
-  const hours = totalMinutes/60;
-  let deduction = 0;
-  if(sickMode==='1') deduction = Math.round(hours * 10);
-  else if(sickMode==='2+') deduction = Math.round(hours * 100);
-  const finalAllowance = Math.max(0, totalAllowance - deduction);
-  document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
-  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
-  const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
-  document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
-  document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
+/* ---------- INIT ---------- */
+function updateRankDisplay(){ const el = document.getElementById('rankDisplay'); if(el){ el.textContent = 'Rank: ' + rankMode; } }
+
+function init(){
+  renderSelectors(10);
+  renderList();
+  compute();
+
+  document.getElementById('savePng').addEventListener('click', saveAsPicture);
+
+  const sSel = document.getElementById('sickSelect');
+  sSel.addEventListener('change', () => { sickMode = sSel.value; compute(); });
+
+  const rSel = document.getElementById('rankSelect');
+  rSel.addEventListener('change', () => {
+    rankMode = rSel.value;
+    updateRankDisplay();
+    refreshFlightOptionLabels(); // reflect rank in dropdown options
+    renderList();
+    compute();
+  });
+
+  // Dark mode toggle (no persistence by design)
+  const darkToggle = document.getElementById('darkToggle');
+  darkToggle.addEventListener('change', () => {
+    document.documentElement.setAttribute('data-theme', darkToggle.checked ? 'dark' : 'light');
+  });
+
+  // Initialize from current controls
+  rankMode = rSel.value;
+  sickMode = sSel.value;
+  updateRankDisplay();
+  refreshFlightOptionLabels();
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  // No persistence: page refresh resets everything by design.
-  init();
-});
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
