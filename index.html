@@ -134,7 +134,6 @@ tbody tr:hover{background:#fcfcfc}
               <h3>Total Block Hours</h3>
               <div id="totalHours" class="value">0:00 H</div>
             </div>
-            <button id="copyTotals" class="btn small">Copy totals</button>
           </div>
         </div>
         <div class="card kpi">
@@ -378,13 +377,6 @@ function exportCsv(){
   const blob = new Blob([header+body], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='selected-flights.csv'; a.click(); URL.revokeObjectURL(url);
-}
-
-function copyTotals(){
-  const text = `Rank: ${rankMode} | Total Block Hours: ${document.getElementById('totalHours').textContent} | Total Allowance: ${document.getElementById('totalAllowance').textContent}`;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.getElementById('copyTotals'); btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy totals', 1200);
-  }).catch(()=>{});
 }
 
 function compute(){
