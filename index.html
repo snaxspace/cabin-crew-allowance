@@ -33,8 +33,6 @@ select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%
 .btn{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700}
 .btn:hover{border-color:#ccc}
 .btn.small{padding:8px 10px;font-size:13px}
-.btn.danger{border-color:#f2c4c4}
-.btn.danger:hover{border-color:#e89a9a}
 .table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 table{width:100%;border-collapse:collapse}
 thead th{background:#fafafa;color:#000;font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
@@ -88,11 +86,10 @@ tbody tr:hover{background:#fcfcfc}
       <section class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
           <h2 style="margin:0">Selected Flights</h2>
-          <div class="tools" style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="savePng" class="btn small">Save / Share Image</button>
-            <button id="exportCsv" class="btn small">Export CSV</button>
-            <button id="clearAll" class="btn danger small">Clear All</button>
-          </div>
+        </div>
+        <!-- Single centered action button -->
+        <div class="tools" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button id="savePng" class="btn small">Save / Share Image</button>
         </div>
         <div class="table-wrap" style="margin-top:8px;">
           <table id="listTable">
@@ -202,8 +199,6 @@ function init(){
   renderList();
   compute();
 
-  document.getElementById('clearAll').addEventListener('click', clearAll);
-  document.getElementById('exportCsv').addEventListener('click', exportCsv);
   document.getElementById('savePng').addEventListener('click', saveAsPicture);
 
   const sSel = document.getElementById('sickSelect');
@@ -217,7 +212,10 @@ function init(){
     renderList();
     compute();
   });
+
+  // initialize from current controls
   rankMode = rSel.value;
+  sickMode = sSel.value;
   updateRankDisplay();
   refreshFlightOptionLabels();
 }
@@ -348,33 +346,8 @@ function renderList(){
   });
 }
 
-function clearAll(){
-  if(!confirm('Remove all selected flights?')) return;
-  chosen = []; renderList(); compute();
-  document.querySelectorAll('#selectors .selector-row').forEach(row => {
-    const selects = row.querySelectorAll('select');
-    const [flightSel, laySel] = selects;
-    if(flightSel){ flightSel.value=''; flightSel.dataset.addedIndex=undefined; }
-    if(laySel){ laySel.value='24'; laySel.style.display='inline-block'; }
-    const lbl = row.querySelector('label.small'); if(lbl){ lbl.style.display='inline-block'; }
-    const qt = row.querySelector('.pill'); if(qt){ qt.style.display='none'; }
-    const reset = row.querySelector('.mini'); if(reset){ reset.disabled=true; }
-  });
-  const sSel = document.getElementById('sickSelect');
-  sSel.value = 'none'; sickMode = 'none';
-  document.getElementById('sickInfo').textContent=''; document.getElementById('deductNote').textContent='';
-}
-
-function exportCsv(){
-  const header = 'rank,code,layover,block,allowance\n';
-  const body = chosen.map(c => {
-    const allow = rowAllowance(c);
-    return [rankMode, c.code, (c.layover==='QT'?'Quickturn':(c.layover+'H')), formatBlock(c.block), allow].join(',');
-  }).join('\n');
-  const blob = new Blob([header+body], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='selected-flights.csv'; a.click(); URL.revokeObjectURL(url);
-}
+function clearAll(){ /* removed: no UI */ }
+function exportCsv(){ /* removed: no UI */ }
 
 async function saveAsPicture(){
   const target = document.getElementById('captureArea');
@@ -385,29 +358,21 @@ async function saveAsPicture(){
         if (!blob) return reject(new Error('Canvas toBlob failed.'));
         const file = new File([blob], 'snax-allowance.png', { type: 'image/png' });
 
-        // Try native Share first (Android Chrome, iOS 16.4+ Safari, etc.)
+        // Prefer native share (Android Chrome, iOS 16.4+ Safari)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({ files: [file], title: 'Snax Allowance', text: 'Selected flights & totals' });
             return resolve();
-          } catch (e) {
-            // User canceled or share failed; continue to fallback
-          }
+          } catch (e) { /* fall back */ }
         }
 
-        // Fallback: download link (works on Android/desktop)
+        // Fallback to download / open
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'snax-allowance.png';
-
-        // iOS Safari older behavior: open in new tab → long-press Save Image
         const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-        if (isIOS) {
-          window.open(url, '_blank', 'noopener');
-        } else {
-          a.click();
-        }
+        if (isIOS) window.open(url, '_blank', 'noopener'); else a.click();
         URL.revokeObjectURL(url);
         resolve();
       }, 'image/png');
@@ -417,8 +382,6 @@ async function saveAsPicture(){
     alert('Could not generate image. Try again.');
   }
 }
-
-function renderSummary(){ /* kept for future extension if you re-enable per-destination summary */ }
 
 function compute(){
   let totalMinutes=0, totalAllowance=0;
@@ -436,8 +399,7 @@ function compute(){
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  sickMode = document.getElementById('sickSelect').value;
-  rankMode = document.getElementById('rankSelect').value;
+  // No persistence: page refresh resets everything by design.
   init();
 });
 </script>
