@@ -13,20 +13,15 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.
 .banner{background:#fff;border-bottom:1px solid var(--line)}
 .banner .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;padding:14px 0}
-/* white square behind emoji */
 .brand .logo{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--red);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--line)}
 .brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:.2px}
 .content{display:grid;gap:16px;padding:16px 0}
 .card{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
 .card h2{font-size:16px;font-weight:700;margin:0 0 8px}
-
-/* KPI totals in AirAsia red */
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark)}
 .kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95}
 .value{font-size:28px;font-weight:700}
-
-/* Inputs */
 label.small{font-size:12px;color:#666;margin-right:6px}
 select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%23666" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600}
 .selector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
@@ -34,24 +29,20 @@ select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%
 .selector-row .mini{background:#fff;color:var(--text);border:1px solid var(--line);padding:8px 10px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600}
 .selector-row .mini:hover{border-color:#ccc}
 .pill{display:inline-block;background:#f2f2f2;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
-
-/* Buttons */
 .btn{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700}
 .btn:hover{border-color:#ccc}
 .btn.small{padding:8px 10px;font-size:13px}
 .btn.outline{background:#fff}
 .btn.danger{border-color:#f2c4c4}
 .btn.danger:hover{border-color:#e89a9a}
-
-/* Tables */
 .table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 table{width:100%;border-collapse:collapse}
 thead th{background:#fafafa;color:#000;font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
 th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:hover{background:#fcfcfc}
-
 .footer{color:#555;border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
-.smallnote{font-size:12px;color:#666}
+.smallnote{font-size:12px;color:#555}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -65,6 +56,20 @@ tbody tr:hover{background:#fcfcfc}
   </div>
 
   <main class="wrap content">
+    <section class="card">
+      <h2>Settings</h2>
+      <div class="tools">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label class="small" for="rankSelect">Rank:</label>
+          <select id="rankSelect">
+            <option value="CC" selected>CC</option>
+            <option value="PUR/SCC">PUR/SCC</option>
+          </select>
+          <span id="rankInfo" class="smallnote"></span>
+        </div>
+      </div>
+    </section>
+
     <section class="card">
       <h2>Select Flights</h2>
       <div id="selectors" class="selector-grid"></div>
@@ -82,65 +87,53 @@ tbody tr:hover{background:#fcfcfc}
       <p class="smallnote">Choose your flights. For non‑DEL flights, set a <b>Layover</b> of <b>24H</b> (default), <b>48H</b> (+2,880), or <b>72H</b> (+5,670). DEL is <b>Quickturn</b>.</p>
     </section>
 
-    <section class="card">
-      <h2>Selected Flights</h2>
-      <div class="table-wrap">
-        <table id="listTable">
-          <thead>
-            <tr>
-              <th>Flight</th>
-              <th>Layover</th>
-              <th>Block Hours</th>
-              <th>Allowance (THB)</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="clearAll" class="btn danger small">Clear All</button>
-        <button id="exportCsv" class="btn small">Export CSV</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Per‑destination summary</h2>
-      <div class="table-wrap">
-        <table id="summaryTable">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Count</th>
-              <th>Total Block</th>
-              <th>Total Allowance (THB)</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <p class="smallnote">Grouped by flight code.</p>
-    </section>
-
-    <section class="kpis">
-      <div class="card kpi">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <div>
-            <h3>Total Block Hours</h3>
-            <div id="totalHours" class="value">0:00 H</div>
+    <div id="captureArea">
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <h2 style="margin:0">Selected Flights</h2>
+          <div class="tools">
+            <button id="savePng" class="btn small">Save as Picture</button>
+            <button id="exportCsv" class="btn small">Export CSV</button>
+            <button id="clearAll" class="btn danger small">Clear All</button>
           </div>
-          <button id="copyTotals" class="btn small">Copy totals</button>
         </div>
-      </div>
-      <div class="card kpi">
-        <h3>Total Allowance</h3>
-        <div id="totalAllowance" class="value">0 THB</div>
-        <!-- white note with opacity .9 -->
-        <div id="deductNote" style="margin-top:4px;color:#fff;opacity:.9;font-size:12px"></div>
-      </div>
-    </section>
+        <div class="table-wrap" style="margin-top:8px;">
+          <table id="listTable">
+            <thead>
+              <tr>
+                <th>Flight</th>
+                <th>Layover</th>
+                <th>Block Hours</th>
+                <th>Allowance (THB)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
 
-    <!-- Visitor badge line -->
+      <!-- Rank line (left-aligned, soft gray) -->
+      <div id="rankDisplay" class="smallnote" style="margin:2px 0 0 2px;">Rank: CC</div>
+
+      <section class="kpis" style="margin-top:6px;">
+        <div class="card kpi">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div>
+              <h3>Total Block Hours</h3>
+              <div id="totalHours" class="value">0:00 H</div>
+            </div>
+            <button id="copyTotals" class="btn small">Copy totals</button>
+          </div>
+        </div>
+        <div class="card kpi">
+          <h3>Total Allowance</h3>
+          <div id="totalAllowance" class="value">0 THB</div>
+          <div id="deductNote" style="margin-top:4px;color:#fff;opacity:.9;font-size:12px"></div>
+        </div>
+      </section>
+    </div>
+
     <div style="text-align:center;margin-top:12px;color:#555;font-size:13px;">
       🧍‍♂️ Visitors:
       <img src="https://visitor-badge.laobi.icu/badge?page_id=snaxspace.cabin-crew-allowance"
@@ -154,8 +147,8 @@ tbody tr:hover{background:#fcfcfc}
     <div class="wrap">SNAX: Just a forecast, ok?</div>
   </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-// Flight base data (allowance includes 24h layover for non-DEL)
 const FLIGHTS = [
   { code: "DEL", block: "8:35", allowance: 4290 },
   { code: "PVG", block: "8.55", allowance: 7230 },
@@ -166,13 +159,13 @@ const FLIGHTS = [
   { code: "CTS", block: "15.00", allowance: 9370 }
 ];
 
-// Layover extra amounts (over 24H baseline) for non-DEL
 const LAYOVER_EXTRA = { "24": 0, "48": 2880, "72": 5670 };
+const RANK_BONUS = { "CC": 0, "PUR/SCC": 500 };
 
-// No persistence across refresh
 let chosen = [];
 let rowCounter = 0;
-let sickMode = 'none'; // 'none' | '1' | '2+'
+let sickMode = 'none';
+let rankMode = 'CC';
 
 function $(s){ return document.querySelector(s); }
 function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits:0}).format(n) + ' THB'; }
@@ -187,6 +180,12 @@ function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':
 function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
 function optionLabel(f){ return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(f.allowance)} THB`; }
 
+function rowAllowance(entry){
+  const layExtra = entry.layover === 'QT' ? 0 : (LAYOVER_EXTRA[entry.layover] || 0);
+  const rankExtra = RANK_BONUS[rankMode] || 0;
+  return (entry.baseAllowance || 0) + layExtra + rankExtra;
+}
+
 function init(){
   renderSelectors(10);
   renderList();
@@ -198,6 +197,23 @@ function init(){
 
   const sSel = document.getElementById('sickSelect');
   sSel.addEventListener('change', () => { sickMode = sSel.value; compute(); });
+
+  const rSel = document.getElementById('rankSelect');
+  rSel.addEventListener('change', () => { rankMode = rSel.value; updateRankInfo(); updateRankDisplay(); renderList(); compute(); });
+  updateRankInfo();
+  updateRankDisplay();
+
+  document.getElementById('savePng').addEventListener('click', saveAsPicture);
+}
+
+function updateRankInfo(){
+  const info = document.getElementById('rankInfo');
+  if(info) info.textContent = '';
+}
+
+function updateRankDisplay(){
+  const el = document.getElementById('rankDisplay');
+  if(el) el.textContent = 'Rank: ' + rankMode;
 }
 
 function renderSelectors(n){
@@ -221,7 +237,7 @@ function addSelectorRow(parent){
   const layoverSelect = document.createElement('select');
   layoverSelect.innerHTML = '<option value=\"24\">24H</option><option value=\"48\">48H</option><option value=\"72\">72H</option>';
   layoverSelect.dataset.rowId = rowId;
-  layoverSelect.value = '24'; // default
+  layoverSelect.value = '24';
 
   const quickturn = document.createElement('span');
   quickturn.className = 'pill';
@@ -236,25 +252,24 @@ function addSelectorRow(parent){
   function updateEntryForRow(code){
     const data = FLIGHTS.find(f => f.code === code);
     if(!data) return;
-    if(select.dataset.addedIndex !== undefined){
-      const idx = parseInt(select.dataset.addedIndex,10);
-      if(!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId){ chosen.splice(idx,1); }
+    // Remove any previous entry for this row
+    if (select.dataset.addedIndex !== undefined) {
+      const idx = parseInt(select.dataset.addedIndex, 10);
+      if (!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId) {
+        chosen.splice(idx, 1);
+      }
     }
     let lay = '24';
-    let extra = 0;
     if(code === 'DEL'){
       lay = 'QT';
-      extra = 0;
     } else {
       lay = layoverSelect.value || '24';
-      extra = LAYOVER_EXTRA[lay] || 0;
     }
     const entry = {
       code: data.code,
       block: data.block,
       baseAllowance: data.allowance,
       layover: lay,
-      allowance: data.allowance + extra,
       _rowId: rowId
     };
     chosen.push(entry);
@@ -274,7 +289,7 @@ function addSelectorRow(parent){
       layLabel.style.display = 'inline-block';
       layoverSelect.style.display = 'inline-block';
       quickturn.style.display = 'none';
-      layoverSelect.value = '24'; // default to 24H when a non-DEL flight is chosen
+      layoverSelect.value = '24';
     }
     updateEntryForRow(code);
   });
@@ -308,11 +323,12 @@ function renderList(){
   chosen.forEach((item, idx) => {
     const layLabel = item.layover === 'QT' ? 'Quickturn' : (item.layover + ' H');
     const tr = document.createElement('tr');
+    const allowance = rowAllowance(item);
     tr.innerHTML = `
       <td><span class="pill">${item.code}</span></td>
       <td>${layLabel}</td>
       <td>${formatBlock(item.block)}</td>
-      <td>${fmtTHB(item.allowance)}</td>
+      <td>${fmtTHB(allowance)}</td>
       <td><button class="btn small" data-idx="${idx}">Remove</button></td>`;
     tr.querySelector('button').addEventListener('click', (e) => {
       const i = +e.currentTarget.getAttribute('data-idx');
@@ -328,7 +344,7 @@ function buildSummary(){
     const m = map.get(it.code) || { count:0, minutes:0, allowance:0 };
     m.count += 1;
     m.minutes += parseBlockToMinutes(it.block);
-    m.allowance += +it.allowance||0;
+    m.allowance += rowAllowance(it);
     map.set(it.code, m);
   }
   const rows = [];
@@ -367,19 +383,23 @@ function clearAll(){
     const reset = row.querySelector('.mini'); if(reset){ reset.disabled=true; }
   });
   const sSel = document.getElementById('sickSelect');
-  sSel.value = 'none'; sickMode = 'none'; document.getElementById('sickInfo').textContent=''; document.getElementById('deductNote').textContent='';
+  sSel.value = 'none'; sickMode = 'none';
+  document.getElementById('sickInfo').textContent=''; document.getElementById('deductNote').textContent='';
 }
 
 function exportCsv(){
-  const header = 'code,layover,block,allowance\n';
-  const body = chosen.map(c => [c.code, (c.layover==='QT'?'Quickturn':(c.layover+'H')), formatBlock(c.block), c.allowance].join(',')).join('\n');
+  const header = 'rank,code,layover,block,allowance\n';
+  const body = chosen.map(c => {
+    const allow = rowAllowance(c);
+    return [rankMode, c.code, (c.layover==='QT'?'Quickturn':(c.layover+'H')), formatBlock(c.block), allow].join(',');
+  }).join('\n');
   const blob = new Blob([header+body], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='selected-flights.csv'; a.click(); URL.revokeObjectURL(url);
 }
 
 function copyTotals(){
-  const text = `Total Block Hours: ${document.getElementById('totalHours').textContent} | Total Allowance: ${document.getElementById('totalAllowance').textContent}`;
+  const text = `Rank: ${rankMode} | Total Block Hours: ${document.getElementById('totalHours').textContent} | Total Allowance: ${document.getElementById('totalAllowance').textContent}`;
   navigator.clipboard.writeText(text).then(()=>{
     const btn = document.getElementById('copyTotals'); btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy totals', 1200);
   }).catch(()=>{});
@@ -387,7 +407,7 @@ function copyTotals(){
 
 function compute(){
   let totalMinutes=0, totalAllowance=0;
-  chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += +it.allowance||0; });
+  chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
   const hours = totalMinutes/60;
   let deduction = 0;
   if(sickMode==='1') deduction = Math.round(hours * 10);
@@ -399,6 +419,19 @@ function compute(){
   document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
   document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
   renderSummary();
+}
+
+function saveAsPicture(){
+  const target = document.getElementById('captureArea');
+  html2canvas(target, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'snax-allowance.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(err => {
+    alert('Could not generate image. Please try again.');
+    console.error(err);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);
