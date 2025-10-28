@@ -15,42 +15,31 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.
 .brand{display:flex;align-items:center;gap:10px;padding:14px 0}
 .brand .logo{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--red);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--line)}
 .brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:.2px}
-
 .content{display:grid;gap:16px;padding:16px 0}
 .card{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
 .card h2{font-size:16px;font-weight:700;margin:0 0 8px}
-
-/* KPI totals in AirAsia red */
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .kpi{background:var(--red);color:#fff;border:1px solid var(--red-dark)}
 .kpi h3{margin:0 0 6px;font-size:14px;font-weight:600;opacity:.95}
 .value{font-size:28px;font-weight:700}
-
 label.small{font-size:12px;color:#666;margin-right:6px}
 .smallnote{font-size:12px;color:#555}
-
-select{
-  appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%23666" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;
-  background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600
-}
+select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg fill="%23666" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600}
 .selector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
 .selector-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .selector-row .mini{background:#fff;color:var(--text);border:1px solid var(--line);padding:8px 10px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600}
 .selector-row .mini:hover{border-color:#ccc}
 .pill{display:inline-block;background:#f2f2f2;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
-
 .btn{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700}
 .btn:hover{border-color:#ccc}
 .btn.small{padding:8px 10px;font-size:13px}
 .btn.danger{border-color:#f2c4c4}
 .btn.danger:hover{border-color:#e89a9a}
-
 .table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 table{width:100%;border-collapse:collapse}
 thead th{background:#fafafa;color:#000;font-weight:700;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
 th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:hover{background:#fcfcfc}
-
 .footer{color:#555;border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
 </style>
 </head>
@@ -65,7 +54,6 @@ tbody tr:hover{background:#fcfcfc}
   </div>
 
   <main class="wrap content">
-    <!-- Settings -->
     <section class="card">
       <h2>Settings</h2>
       <div class="tools" style="display:flex;gap:8px;flex-wrap:wrap">
@@ -79,7 +67,6 @@ tbody tr:hover{background:#fcfcfc}
       </div>
     </section>
 
-    <!-- Select flights -->
     <section class="card">
       <h2>Select Flights</h2>
       <div id="selectors" class="selector-grid"></div>
@@ -94,10 +81,9 @@ tbody tr:hover{background:#fcfcfc}
         <span id="sickInfo" class="smallnote"></span>
       </div>
 
-      <p class="smallnote">Choose your flights. For non-DEL flights, set a <b>Layover</b> of <b>24H</b> (default), <b>48H</b> (+2,880), or <b>72H</b> (+5,670). DEL is <b>Quickturn</b>.</p>
+      <p class="smallnote">Choose your flights. For non‑DEL flights, set a <b>Layover</b> of <b>24H</b> (default), <b>48H</b> (+2,880), or <b>72H</b> (+5,670). DEL is <b>Quickturn</b>.</p>
     </section>
 
-    <!-- Capture area (included in Save as Picture) -->
     <div id="captureArea">
       <section class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -124,7 +110,7 @@ tbody tr:hover{background:#fcfcfc}
         </div>
       </section>
 
-      <!-- Left-aligned soft gray rank label -->
+      <!-- Rank line (left-aligned, soft gray) -->
       <div id="rankDisplay" class="smallnote" style="margin:2px 0 0 2px;">Rank: CC</div>
 
       <section class="kpis" style="margin-top:6px;">
@@ -139,13 +125,11 @@ tbody tr:hover{background:#fcfcfc}
         <div class="card kpi">
           <h3>Total Allowance</h3>
           <div id="totalAllowance" class="value">0 THB</div>
-          <!-- White note with slight opacity, as requested -->
           <div id="deductNote" style="margin-top:4px;color:#fff;opacity:.9;font-size:12px"></div>
         </div>
       </section>
     </div>
 
-    <!-- Visitor badge -->
     <div style="text-align:center;margin-top:12px;color:#555;font-size:13px;">
       🧍‍♂️ Visitors:
       <img src="https://visitor-badge.laobi.icu/badge?page_id=snaxspace.cabin-crew-allowance"
@@ -158,7 +142,6 @@ tbody tr:hover{background:#fcfcfc}
     <div class="wrap">SNAX: Just a forecast, ok?</div>
   </footer>
 
-<!-- Save as picture -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 const FLIGHTS = [
@@ -181,7 +164,6 @@ let rankMode = 'CC';
 
 function $(s){ return document.querySelector(s); }
 function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits:0}).format(n) + ' THB'; }
-
 function parseBlockToMinutes(s){
   if(typeof s === 'number'){ return Math.round(s*60); }
   if(!s) return 0; s=String(s).trim();
@@ -191,7 +173,21 @@ function parseBlockToMinutes(s){
 }
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
-function optionLabel(f){ return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(f.allowance)} THB`; }
+
+function optionLabel(f){
+  const bonus = RANK_BONUS[rankMode] || 0;
+  const displayAllowance = (Number(f.allowance) || 0) + bonus;
+  return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(displayAllowance)} THB`;
+}
+
+function refreshFlightOptionLabels(){
+  document.querySelectorAll('#selectors .selector-row select:first-child').forEach(sel => {
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Select a flight…</option>' +
+      FLIGHTS.map(f => `<option value="${f.code}">${optionLabel(f)}</option>`).join('');
+    sel.value = current;
+  });
+}
 
 function rowAllowance(entry){
   const layExtra = entry.layover === 'QT' ? 0 : (LAYOVER_EXTRA[entry.layover] || 0);
@@ -206,7 +202,6 @@ function init(){
 
   document.getElementById('clearAll').addEventListener('click', clearAll);
   document.getElementById('exportCsv').addEventListener('click', exportCsv);
-  document.getElementById('copyTotals').addEventListener('click', copyTotals);
   document.getElementById('savePng').addEventListener('click', saveAsPicture);
 
   const sSel = document.getElementById('sickSelect');
@@ -216,12 +211,13 @@ function init(){
   rSel.addEventListener('change', () => {
     rankMode = rSel.value;
     updateRankDisplay();
+    refreshFlightOptionLabels();
     renderList();
     compute();
   });
-  // initialize the rank label once on load
   rankMode = rSel.value;
   updateRankDisplay();
+  refreshFlightOptionLabels();
 }
 
 function updateRankDisplay(){
@@ -265,19 +261,18 @@ function addSelectorRow(parent){
   function updateEntryForRow(code){
     const data = FLIGHTS.find(f => f.code === code);
     if(!data) return;
-
-    // Remove previous entry for this row (if any)
     if (select.dataset.addedIndex !== undefined) {
       const idx = parseInt(select.dataset.addedIndex, 10);
       if (!isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId) {
         chosen.splice(idx, 1);
       }
     }
-
     let lay = '24';
-    if(code === 'DEL'){ lay = 'QT'; }
-    else { lay = layoverSelect.value || '24'; }
-
+    if(code === 'DEL'){
+      lay = 'QT';
+    } else {
+      lay = layoverSelect.value || '24';
+    }
     const entry = {
       code: data.code,
       block: data.block,
@@ -380,21 +375,15 @@ function exportCsv(){
 }
 
 function compute(){
-  // totals
   let totalMinutes=0, totalAllowance=0;
   chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
   const hours = totalMinutes/60;
-
-  // sick-leave deduction
   let deduction = 0;
   if(sickMode==='1') deduction = Math.round(hours * 10);
   else if(sickMode==='2+') deduction = Math.round(hours * 100);
   const finalAllowance = Math.max(0, totalAllowance - deduction);
-
-  // render totals
   document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
   document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
-
   const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
   document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
   document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
@@ -414,7 +403,6 @@ function saveAsPicture(){
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  // init state
   sickMode = document.getElementById('sickSelect').value;
   rankMode = document.getElementById('rankSelect').value;
   init();
