@@ -190,23 +190,29 @@ function init(){
   renderList();
   compute();
 
-  $('#clearAll').addEventListener('click', clearAll);
-  $('#exportCsv').addEventListener('click', exportCsv);
-  $('#copyTotals').addEventListener('click', copyTotals);
+  document.getElementById('clearAll').addEventListener('click', clearAll);
+  document.getElementById('exportCsv').addEventListener('click', exportCsv);
+  document.getElementById('copyTotals').addEventListener('click', copyTotals);
+  document.getElementById('savePng').addEventListener('click', saveAsPicture);
 
   const sSel = document.getElementById('sickSelect');
   sSel.addEventListener('change', () => { sickMode = sSel.value; compute(); });
 
   const rSel = document.getElementById('rankSelect');
-  rSel.addEventListener('change', () => { rankMode = rSel.value; updateRankDisplay(); renderList(); compute(); });
+  rSel.addEventListener('change', () => {
+    rankMode = rSel.value;
+    updateRankDisplay();
+    renderList();
+    compute();
+  });
+  // Initialize once on load
+  rankMode = document.getElementById('rankSelect').value;
   updateRankDisplay();
-
-  document.getElementById('savePng').addEventListener('click', saveAsPicture);
 }
 
 function updateRankDisplay(){
   const el = document.getElementById('rankDisplay');
-  if(el) el.textContent = 'Rank: ' + rankMode;
+  if(el){ el.textContent = 'Rank: ' + rankMode; }
 }
 
 function renderSelectors(n){
