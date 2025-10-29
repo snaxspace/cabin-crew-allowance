@@ -53,15 +53,19 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.
 .value{font-size:28px;font-weight:700;padding:0 14px 14px}
 label.small{font-size:12px;color:var(--muted);margin-right:6px}
 .smallnote{font-size:12px;color:var(--muted)}
-select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg fill="%239AA3AF" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600;min-width:180px}
-.selector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg fill="%239AA3AF" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600;min-width:200px}
+
+/* Selector row (minimal) */
 .selector-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .selector-row .mini{background:var(--btn);color:var(--btn-text);border:1px solid var(--line);padding:8px 10px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600}
 .selector-row .mini:hover{border-color:#ccc}
 .pill{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+
+/* Add button */
 .btn{background:var(--btn);color:var(--btn-text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:700;min-width:160px}
 .btn:hover{border-color:#ccc}
 .btn.small{padding:10px 12px;font-size:14px}
+.btn.ghost{background:transparent;border:1px dashed var(--line);}
 
 /* ---------- SUMMARY LIST (COMPACT) ---------- */
 .summary-wrap{margin-top:8px}
@@ -91,7 +95,7 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
   .tools.center-mobile{justify-content:center}
   .btn{width:100%}
   .value{font-size:26px}
-  .summary-grid{grid-template-columns:1fr} /* one column on phones */
+  .summary-grid{grid-template-columns:1fr}
 }
 
 /* ---------- DARK MODE TOGGLE (switch) ---------- */
@@ -139,7 +143,12 @@ input:checked + .slider:before{transform:translateX(24px)}
 
     <section class="card">
       <h2>Select Flights</h2>
+
+      <!-- Minimal: starts with one selector; Add more = infinite -->
       <div id="selectors" class="selector-grid"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
+        <button id="addFlightBtn" class="btn ghost small" style="min-width:auto;">+ Add flight</button>
+      </div>
 
       <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
         <label class="small" for="sickSelect">Sick Leave:</label>
@@ -151,7 +160,7 @@ input:checked + .slider:before{transform:translateX(24px)}
         <span id="sickInfo" class="smallnote"></span>
       </div>
 
-      <p class="smallnote">Choose your flights. For non-DEL flights, set a <b>Layover</b> of <b>24H</b> (default), <b>48H</b> (+2,880), or <b>72H</b> (+5,670). DEL is <b>Quickturn</b>.</p>
+      <p class="smallnote">Tip: add flights one by one. DEL becomes <b>Quickturn</b>; others use <b>Layover</b> 24/48/72H.</p>
     </section>
 
     <div id="captureArea">
@@ -159,18 +168,14 @@ input:checked + .slider:before{transform:translateX(24px)}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
           <h2 style="margin:0">Per-destination Summary</h2>
         </div>
-        <!-- Single centered action button -->
         <div class="tools center-mobile" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px">
           <button id="savePng" class="btn small">Save / Share Image</button>
         </div>
-
-        <!-- COMPACT SUMMARY LIST -->
         <div id="summaryWrap" class="summary-wrap">
           <div id="summaryList" class="summary-grid"></div>
         </div>
       </section>
 
-      <!-- Rank line (left-aligned, soft gray) -->
       <div id="rankDisplay" class="smallnote" style="margin:2px 0 0 2px;">Rank: CC</div>
 
       <section class="kpis" style="margin-top:6px;">
@@ -258,7 +263,7 @@ function rowAllowance(entry){
   return (Number(entry.baseAllowance) || 0) + layExtra + rankExtra;
 }
 
-/* Build compact grouped summary like "DEL × 4 — 17,160 THB" */
+/* Compact grouped summary like "DEL × 4 — 17,160 THB" */
 function renderSummary(){
   const wrap = document.getElementById('summaryList');
   wrap.innerHTML = '';
@@ -266,8 +271,6 @@ function renderSummary(){
     wrap.innerHTML = '<div class="smallnote" style="text-align:center">No flights selected yet.</div>';
     return;
   }
-
-  // Group by code
   const groups = {};
   chosen.forEach(it => {
     const key = it.code;
@@ -275,8 +278,6 @@ function renderSummary(){
     groups[key].count += 1;
     groups[key].subtotal += rowAllowance(it);
   });
-
-  // Render items
   Object.values(groups).sort((a,b)=>a.code.localeCompare(b.code)).forEach(g => {
     const div = document.createElement('div');
     div.className = 'summary-item';
@@ -291,6 +292,140 @@ function renderSummary(){
   });
 }
 
+/* ---------- TOTALS ---------- */
+function compute(){
+  let totalMinutes=0, totalAllowance=0;
+  chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
+  const hours = totalMinutes/60;
+  let deduction = 0;
+  if(sickMode==='1') deduction = Math.round(hours * 10);
+  else if(sickMode==='2+') deduction = Math.round(hours * 100);
+  const finalAllowance = Math.max(0, totalAllowance - deduction);
+  document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
+  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
+  const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
+  document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
+  document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
+  renderSummary();
+}
+
+/* ---------- SELECTORS (progressive add; no limit) ---------- */
+function renderSelectors(startCount){
+  const wrap = document.getElementById('selectors'); 
+  wrap.innerHTML='';
+  for(let i=0;i<startCount;i++){ addSelectorRow(wrap); }
+}
+
+function addSelectorRow(parent){
+  const rowId = ++rowCounter;
+  const row = document.createElement('div');
+  row.className='selector-row';
+
+  const select = document.createElement('select');
+  select.innerHTML = '<option value="">Select a flight…</option>' + FLIGHTS.map(f => `<option value="${f.code}">${optionLabel(f)}</option>`).join('');
+  select.dataset.rowId = rowId;
+
+  const layLabel = document.createElement('label');
+  layLabel.className = 'small';
+  layLabel.textContent = 'Layover:';
+  layLabel.style.display = 'none'; // hidden until a flight is chosen
+
+  const layoverSelect = document.createElement('select');
+  layoverSelect.innerHTML = '<option value="24">24H</option><option value="48">48H</option><option value="72">72H</option>';
+  layoverSelect.dataset.rowId = rowId;
+  layoverSelect.value = '24';
+  layoverSelect.style.display = 'none'; // hidden until a flight is chosen
+
+  const quickturn = document.createElement('span');
+  quickturn.className = 'pill';
+  quickturn.textContent = 'Quickturn';
+  quickturn.style.display = 'none';
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'mini';
+  resetBtn.textContent = 'Reset';
+  resetBtn.disabled = true;
+
+  function updateEntryForRow(code){
+    const data = FLIGHTS.find(f => f.code === code);
+    if(!data) return;
+
+    if (select.dataset.addedIndex !== undefined) {
+      const idx = parseInt(select.dataset.addedIndex, 10);
+      if (!Number.isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId) {
+        chosen.splice(idx, 1);
+      }
+    }
+
+    let lay = '24';
+    if(code === 'DEL'){
+      lay = 'QT';
+      layLabel.style.display = 'none';
+      layoverSelect.style.display = 'none';
+      quickturn.style.display = 'inline-block';
+    } else {
+      quickturn.style.display = 'none';
+      layLabel.style.display = 'inline-block';
+      layoverSelect.style.display = 'inline-block';
+      lay = layoverSelect.value || '24';
+    }
+
+    const entry = {
+      code: data.code,
+      block: data.block,
+      baseAllowance: Number(data.allowance),
+      layover: lay,
+      _rowId: rowId
+    };
+    chosen.push(entry);
+    compute();
+    resetBtn.disabled = false;
+    select.dataset.addedIndex = String(chosen.length-1);
+  }
+
+  select.addEventListener('change', () => {
+    const code = select.value;
+    if(!code) return;
+    // when flight is chosen, reveal layover (or quickturn)
+    if(code === 'DEL'){
+      layLabel.style.display = 'none';
+      layoverSelect.style.display = 'none';
+      quickturn.style.display = 'inline-block';
+    } else {
+      layLabel.style.display = 'inline-block';
+      layoverSelect.style.display = 'inline-block';
+      quickturn.style.display = 'none';
+      layoverSelect.value = '24';
+    }
+    updateEntryForRow(code);
+  });
+
+  layoverSelect.addEventListener('change', () => {
+    const code = select.value;
+    if(!code || code === 'DEL') return;
+    updateEntryForRow(code);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    const idx = parseInt(select.dataset.addedIndex || '-1',10);
+    if(!Number.isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId){
+      chosen.splice(idx,1); compute();
+    }
+    select.value=''; layoverSelect.value='24';
+    select.dataset.addedIndex=undefined; resetBtn.disabled=true;
+    // hide layover again when cleared
+    layLabel.style.display='none'; layoverSelect.style.display='none'; quickturn.style.display='none';
+  });
+
+  row.appendChild(select);
+  row.appendChild(layLabel);
+  row.appendChild(layoverSelect);
+  row.appendChild(quickturn);
+  row.appendChild(resetBtn);
+  parent.appendChild(row);
+}
+
+/* ---------- ACTIONS ---------- */
 async function saveAsPicture(){
   const target = document.getElementById('captureArea');
   try {
@@ -323,129 +458,6 @@ async function saveAsPicture(){
   }
 }
 
-/* ---------- TOTALS ---------- */
-function compute(){
-  let totalMinutes=0, totalAllowance=0;
-  chosen.forEach(it => { totalMinutes += parseBlockToMinutes(it.block); totalAllowance += rowAllowance(it); });
-  const hours = totalMinutes/60;
-  let deduction = 0;
-  if(sickMode==='1') deduction = Math.round(hours * 10);
-  else if(sickMode==='2+') deduction = Math.round(hours * 100);
-  const finalAllowance = Math.max(0, totalAllowance - deduction);
-  document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
-  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
-  const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
-  document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
-  document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
-
-  // refresh compact summary
-  renderSummary();
-}
-
-/* ---------- SELECTORS ---------- */
-function renderSelectors(n){
-  const wrap = $('#selectors'); wrap.innerHTML='';
-  for(let i=0;i<n;i++){ addSelectorRow(wrap); }
-}
-function addSelectorRow(parent){
-  const rowId = ++rowCounter;
-  const row = document.createElement('div');
-  row.className='selector-row';
-
-  const select = document.createElement('select');
-  select.innerHTML = '<option value="">Select a flight…</option>' + FLIGHTS.map(f => `<option value="${f.code}">${optionLabel(f)}</option>`).join('');
-  select.dataset.rowId = rowId;
-
-  const layLabel = document.createElement('label');
-  layLabel.className = 'small';
-  layLabel.textContent = 'Layover:';
-
-  const layoverSelect = document.createElement('select');
-  layoverSelect.innerHTML = '<option value="24">24H</option><option value="48">48H</option><option value="72">72H</option>';
-  layoverSelect.dataset.rowId = rowId;
-  layoverSelect.value = '24';
-
-  const quickturn = document.createElement('span');
-  quickturn.className = 'pill';
-  quickturn.textContent = 'Quickturn';
-  quickturn.style.display = 'none';
-
-  const resetBtn = document.createElement('button');
-  resetBtn.className = 'mini';
-  resetBtn.textContent = 'Reset';
-  resetBtn.disabled = true;
-
-  function updateEntryForRow(code){
-    const data = FLIGHTS.find(f => f.code === code);
-    if(!data) return;
-
-    if (select.dataset.addedIndex !== undefined) {
-      const idx = parseInt(select.dataset.addedIndex, 10);
-      if (!Number.isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId) {
-        chosen.splice(idx, 1);
-      }
-    }
-
-    let lay = '24';
-    if(code === 'DEL'){
-      lay = 'QT';
-    } else {
-      lay = layoverSelect.value || '24';
-    }
-
-    const entry = {
-      code: data.code,
-      block: data.block,
-      baseAllowance: Number(data.allowance),
-      layover: lay,
-      _rowId: rowId
-    };
-    chosen.push(entry);
-    renderSummary(); compute();
-    resetBtn.disabled = false;
-    select.dataset.addedIndex = String(chosen.length-1);
-  }
-
-  select.addEventListener('change', () => {
-    const code = select.value;
-    if(!code) return;
-    if(code === 'DEL'){
-      layLabel.style.display = 'none';
-      layoverSelect.style.display = 'none';
-      quickturn.style.display = 'inline-block';
-    } else {
-      layLabel.style.display = 'inline-block';
-      layoverSelect.style.display = 'inline-block';
-      quickturn.style.display = 'none';
-      layoverSelect.value = '24';
-    }
-    updateEntryForRow(code);
-  });
-
-  layoverSelect.addEventListener('change', () => {
-    const code = select.value;
-    if(!code || code === 'DEL') return;
-    updateEntryForRow(code);
-  });
-
-  resetBtn.addEventListener('click', () => {
-    const idx = parseInt(select.dataset.addedIndex || '-1',10);
-    if(!Number.isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId){
-      chosen.splice(idx,1); renderSummary(); compute();
-    }
-    select.value=''; layoverSelect.value='24';
-    select.dataset.addedIndex=undefined; resetBtn.disabled=true;
-    layLabel.style.display='inline-block'; layoverSelect.style.display='inline-block'; quickturn.style.display='none';
-  });
-
-  row.appendChild(select);
-  row.appendChild(layLabel);
-  row.appendChild(layoverSelect);
-  row.appendChild(quickturn);
-  row.appendChild(resetBtn);
-  parent.appendChild(row);
-}
-
 /* ---------- INIT ---------- */
 function updateRankDisplay(){
   const el = document.getElementById('rankDisplay');
@@ -453,7 +465,7 @@ function updateRankDisplay(){
 }
 
 function init(){
-  renderSelectors(10);
+  renderSelectors(1); // start with ONE row
   renderSummary();
   compute();
 
@@ -466,9 +478,13 @@ function init(){
   rSel.addEventListener('change', () => {
     rankMode = rSel.value;
     updateRankDisplay();
-    refreshFlightOptionLabels(); // reflect rank in dropdown options
-    renderSummary();
+    refreshFlightOptionLabels();
     compute();
+  });
+
+  // + Add flight (no limit)
+  document.getElementById('addFlightBtn').addEventListener('click', () => {
+    addSelectorRow(document.getElementById('selectors'));
   });
 
   // Dark mode toggle (no persistence by design)
@@ -477,7 +493,7 @@ function init(){
     document.documentElement.setAttribute('data-theme', darkToggle.checked ? 'dark' : 'light');
   });
 
-  // Initialize from current controls
+  // Initialize from controls
   rankMode = rSel.value;
   sickMode = sSel.value;
   updateRankDisplay();
