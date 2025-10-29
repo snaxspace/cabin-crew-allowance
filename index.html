@@ -69,16 +69,11 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
 
 /* ---------- SUMMARY LIST (COMPACT) ---------- */
 .summary-wrap{margin-top:8px}
-.summary-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-}
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .summary-item{
   display:flex;align-items:center;justify-content:space-between;
   gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);
-  box-shadow:var(--shadow);
-  font-weight:600;
+  box-shadow:var(--shadow);font-weight:600;
 }
 .summary-item .left{display:flex;align-items:center;gap:8px;min-width:0}
 .summary-item .code{background:var(--pill);border-radius:999px;padding:4px 10px;font-weight:700}
@@ -144,7 +139,7 @@ input:checked + .slider:before{transform:translateX(24px)}
     <section class="card">
       <h2>Select Flights</h2>
 
-      <!-- Minimal: starts with one selector; Add more = infinite -->
+      <!-- Minimal: starts with one selector; Add more = unlimited -->
       <div id="selectors" class="selector-grid"></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
         <button id="addFlightBtn" class="btn ghost small" style="min-width:auto;">+ Add flight</button>
@@ -176,7 +171,8 @@ input:checked + .slider:before{transform:translateX(24px)}
         </div>
       </section>
 
-      <div id="rankDisplay" class="smallnote" style="margin:2px 0 0 2px;">Rank: CC</div>
+      <!-- Updated soft gray line with note -->
+      <div id="rankDisplay" class="smallnote" style="margin:2px 0 0 2px;">Rank: CC — (Base salary not included)</div>
 
       <section class="kpis" style="margin-top:6px;">
         <div class="card kpi">
@@ -245,7 +241,7 @@ function formatBlock(s){ return minutesToHMM(parseBlockToMinutes(s)); }
 function optionLabel(f){
   const bonus = RANK_BONUS[rankMode] || 0;
   const displayAllowance = (Number(f.allowance) || 0) + bonus;
-  return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(displayAllowance)} THB`;
+  return `${f.code} — ${formatBlock(f.block)} · ${new Intl.NumberFormat('en-TH',{maximumNumberFractionDigits:0, maximumFractionDigits:0}).format(displayAllowance)} THB`;
 }
 function refreshFlightOptionLabels(){
   document.querySelectorAll('#selectors .selector-row select:first-child').forEach(sel => {
@@ -309,7 +305,7 @@ function compute(){
   renderSummary();
 }
 
-/* ---------- SELECTORS (progressive add; no limit) ---------- */
+/* ---------- SELECTORS (progressive add; unlimited) ---------- */
 function renderSelectors(startCount){
   const wrap = document.getElementById('selectors'); 
   wrap.innerHTML='';
@@ -350,6 +346,7 @@ function addSelectorRow(parent){
     const data = FLIGHTS.find(f => f.code === code);
     if(!data) return;
 
+    // Remove old entry for this row if exists
     if (select.dataset.addedIndex !== undefined) {
       const idx = parseInt(select.dataset.addedIndex, 10);
       if (!Number.isNaN(idx) && chosen[idx] && chosen[idx]._rowId === rowId) {
@@ -386,7 +383,7 @@ function addSelectorRow(parent){
   select.addEventListener('change', () => {
     const code = select.value;
     if(!code) return;
-    // when flight is chosen, reveal layover (or quickturn)
+    // reveal layover (or quickturn) when a flight is chosen
     if(code === 'DEL'){
       layLabel.style.display = 'none';
       layoverSelect.style.display = 'none';
@@ -461,7 +458,7 @@ async function saveAsPicture(){
 /* ---------- INIT ---------- */
 function updateRankDisplay(){
   const el = document.getElementById('rankDisplay');
-  if(el){ el.textContent = 'Rank: ' + rankMode; }
+  if(el){ el.textContent = 'Rank: ' + rankMode + ' — (Base salary not included)'; }
 }
 
 function init(){
