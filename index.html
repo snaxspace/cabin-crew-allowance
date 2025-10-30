@@ -171,7 +171,7 @@ select.flight-select option{ text-align:center; }
     padding:8px 20px 8px 10px;
   }
 
-  /* Hide "Layover:" label at these sizes (and we also hide it on Quickturn in JS) */
+  /* Hide "Layover:" label at these sizes (and JS hides it for Quickturn) */
   .selector-row .lay-label{ display:none !important; }
 
   .selector-row .layover-select{
@@ -246,10 +246,12 @@ input:checked + .slider:before{transform:translateX(24px)}
           <option value="1">1 day sick leave</option>
           <option value="2+">2 days + sick leave</option>
         </select>
-        <span id="sickInfo" class="smallnote"></span>
       </div>
 
-      <p class="smallnote">Tip: add flights one by one. DEL becomes <b>Quickturn</b>; others can set <b>Layover</b> 24/48/72H or Quickturn. Use OP/DH to mark deadhead if needed.</p>
+      <p class="smallnote" style="margin-top:8px">
+        Use OP/DH to mark deadhead if needed.<br>
+        OP = Operating, DH = Deadhead
+      </p>
     </section>
 
     <div id="captureArea">
@@ -352,7 +354,7 @@ function rowAllowance(entry){
 
   const basePay = (totalMins/60) * 250;
 
-  // Sick Leave → BI rate per OP hour
+  // Sick Leave → BI rate per OP hour (hidden text; still applied)
   const bonusRate = BI_RATE[sickMode] ?? 100;
   const bonus   = (operatingMins/60) * bonusRate;
 
@@ -409,12 +411,7 @@ function compute(){
   document.getElementById('totalAllowance').textContent =
     new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(Math.round(totalAllowance)) + ' THB';
 
-  const sickMapText = {
-    'none': 'Bonus incentive rate: 100 THB per operating hour',
-    '1': 'Bonus incentive rate: 90 THB per operating hour',
-    '2+': 'Bonus incentive rate: 0 THB (no BI)'
-  };
-  document.getElementById('sickInfo').textContent = sickMapText[sickMode] || sickMapText['none'];
+  // (Removed sickInfo line per your request)
   document.getElementById('deductNote').textContent = '';
 
   renderSummary();
@@ -527,14 +524,14 @@ function addSelectorRow(parent){
   delBtn.textContent = '×';
 
   function resetChipsToOP(){
-  const LABELS = ['Out','In'];
-  [chip1, chip2].forEach((chip, i) => {
-    chip.classList.add('active');
-    chip.textContent = `${LABELS[i]}: OP`;
-    chip.title = CHIP_TIP;
-    chip.setAttribute('aria-label', CHIP_TIP);
-  });
-}
+    const LABELS = ['Out','In'];
+    [chip1, chip2].forEach((chip, i) => {
+      chip.classList.add('active');
+      chip.textContent = `${LABELS[i]}: OP`;
+      chip.title = CHIP_TIP;
+      chip.setAttribute('aria-label', CHIP_TIP);
+    });
+  }
 
   function updateOpsVisibility(code){
     opsWrap.style.display = code ? 'flex' : 'none';
