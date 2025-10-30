@@ -7,6 +7,37 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- THEME TOKENS ---------- */
+  /* Keep the delete × in view on narrow phones */
+@media (max-width:560px){
+  .selector-row{ gap:4px; overflow-x:hidden; }
+
+  /* Let the flight select shrink more */
+  .selector-row .flight-select{
+    flex:1 1 40%;
+    min-width:0;          /* allow shrinking below intrinsic width */
+    max-width:48vw;       /* cap so × stays visible */
+    padding:8px 22px 8px 10px; /* slightly tighter padding */
+  }
+
+  /* Make layover a bit narrower */
+  .selector-row .layover-select{
+    min-width:72px;
+    padding:5px 14px 5px 8px;
+    font-size:12px;
+  }
+
+  /* Compact OP/DH chips */
+  .ops-toggle .chip{
+    padding:2px 6px;
+    font-size:10px;
+  }
+  .ops-toggle{ gap:4px; }
+
+  /* Slightly smaller × button */
+  .selector-row .del{
+    width:26px; height:26px;
+  }
+}
 :root{
   --bg:#ffffff;
   --card:#ffffff;
