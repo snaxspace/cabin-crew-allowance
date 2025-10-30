@@ -53,7 +53,24 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.
 .value{font-size:28px;font-weight:700;padding:0 14px 14px}
 label.small{font-size:12px;color:var(--muted);margin-right:6px}
 .smallnote{font-size:12px;color:var(--muted)}
-select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg fill="%239AA3AF" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;background-size:10px;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 28px 10px 12px;font-weight:600;min-width:200px}
+select{
+  appearance:none;
+  background:var(--card) url('data:image/svg+xml;utf8,<svg fill="%239AA3AF" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 10px center;
+  background-size:10px;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 28px 10px 12px;
+  font-weight:600;
+  min-width:200px;
+}
+
+/* Center the displayed value in selects (best-effort across browsers) */
+select.flight-select{
+  text-align:center;
+  text-align-last:center;
+}
+select.flight-select option{ text-align:center; }
 
 /* HERO: Flight selector emphasis (red ring) */
 .selector-row select.flight-select{
@@ -64,26 +81,49 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
   color:var(--text);
 }
 
-/* Row layout: single line, delete on far right */
+/* Row layout: keep ONE LINE, compact, mobile-first */
 .selector-row{
-  display:flex; align-items:center; gap:10px; width:100%;
+  display:flex; align-items:center; gap:6px; width:100%;
+  flex-wrap:nowrap; overflow-x:auto;
+  padding:4px 0;
 }
 
-/* Inline sizing: flight ~70%, layover ~30% */
-.selector-row .flight-select{ flex:0 1 70%; min-width:220px }
+/* Inline sizing: flight flexes, others auto */
+.selector-row .flight-select{ flex:1 1 50%; min-width:120px; }
 .selector-row .layover-select{
-  flex:0 1 30%;
+  flex:0 0 auto;
   padding:6px 22px 6px 10px;
   font-size:13px;
-  min-width:110px;
+  min-width:86px;
   border:1px solid var(--line);
   font-weight:600;
 }
 .selector-row .lay-label.small{font-size:12px;color:var(--muted)}
-.pill{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.pill{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
 
-/* Delete “×” at the far right */
-.selector-row .spacer{flex:1}
+/* OP/DH chips (compact) + info icon */
+.ops-toggle{ display:flex; align-items:center; gap:6px; margin-left:2px; flex:0 0 auto; }
+.chip{
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:3px 6px;
+  font-size:11px; font-weight:700;
+  background:var(--pill);
+  cursor:pointer; user-select:none;
+  white-space:nowrap;
+}
+.chip.active{ border-color:var(--red); box-shadow:0 1px 4px rgba(218,13,24,0.15); }
+.info-icon{
+  width:18px;height:18px;border-radius:50%;
+  border:1px solid var(--line);
+  display:grid;place-items:center;
+  font-size:12px;font-weight:700;color:var(--muted);
+  background:var(--pill); cursor:pointer;
+  flex:0 0 auto;
+}
+
+/* Delete “×” pinned to far right */
+.selector-row .spacer{flex:1 0 auto}
 .selector-row .del{
   background:transparent;
   border:1px solid var(--line);
@@ -91,7 +131,7 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
   width:28px;height:28px;border-radius:8px;
   display:grid;place-items:center;
   cursor:pointer;font-weight:700;line-height:1;
-  margin-left:auto;
+  margin-left:auto; flex:0 0 auto;
 }
 .selector-row .del:hover{border-color:#cfcfcf;color:#666}
 
@@ -114,30 +154,10 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
 .summary-item .count{color:var(--muted);font-weight:600}
 .summary-item .amount{white-space:nowrap}
 
-/* --- Better spacing for stacked flight selectors (mobile-first) --- */
+/* Stack space between rows */
 .selector-grid { display:flex; flex-direction:column; gap:10px; }
-.selector-row { padding:4px 0; }
 
-/* Sector OP/DH chips + info */
-.ops-toggle{ display:flex; align-items:center; gap:6px; margin-left:4px; }
-.chip{
-  border:1px solid var(--line);
-  border-radius:999px;
-  padding:4px 8px;
-  font-size:12px; font-weight:700;
-  background:var(--pill);
-  cursor:pointer; user-select:none;
-}
-.chip.active{ border-color:var(--red); box-shadow:0 1px 4px rgba(218,13,24,0.15); }
-.info-icon{
-  width:18px;height:18px;border-radius:50%;
-  border:1px solid var(--line);
-  display:grid;place-items:center;
-  font-size:12px;font-weight:700;color:var(--muted);
-  background:var(--pill); cursor:pointer;
-}
-
-/* Subtle divider on mobile (faint for dark mode too) */
+/* Mobile polish */
 @media (max-width:560px){
   .brand h1{font-size:16px}
   .kpis{grid-template-columns:1fr}
@@ -147,9 +167,7 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
   .summary-grid{grid-template-columns:1fr}
 
   .selector-row .layover-select{
-    font-size:12px;
-    min-width:90px;
-    padding:6px 18px 6px 10px;
+    font-size:12px; min-width:78px; padding:6px 16px 6px 10px;
   }
 
   .selector-row + .selector-row{
@@ -273,22 +291,21 @@ input:checked + .slider:before{transform:translateX(24px)}
 <script>
 /* ---------- DATA (sector minutes; DEL is quickturn) ---------- */
 const FLIGHTS = [
-  // code, sectors [min1, min2], quickturn?
-  { code: "DEL", sectors: [270, 245], qt: true },  // 4:30, 4:05 (quickturn, no layover)
-  { code: "PVG", sectors: [255, 280], qt: false }, // 4:15, 4:40
-  { code: "ICN", sectors: [335, 370], qt: false }, // 5:35, 6:10
-  { code: "KIX", sectors: [345, 390], qt: false }, // 5:45, 6:30
-  { code: "NGO", sectors: [345, 405], qt: false }, // 5:45, 6:45
-  { code: "NRT", sectors: [370, 450], qt: false }, // 6:10, 7:30
-  { code: "SDJ", sectors: [375, 450], qt: false }, // 6:15, 7:30
-  { code: "ALA", sectors: [430, 400], qt: false }, // 7:10, 6:40
-  { code: "CTS", sectors: [410, 490], qt: false }, // 6:50, 8:10
-  { code: "RUH", sectors: [500, 430], qt: false }  // 8:20, 7:10
+  { code: "DEL", sectors: [270, 245], qt: true },
+  { code: "PVG", sectors: [255, 280], qt: false },
+  { code: "ICN", sectors: [335, 370], qt: false },
+  { code: "KIX", sectors: [345, 390], qt: false },
+  { code: "NGO", sectors: [345, 405], qt: false },
+  { code: "NRT", sectors: [370, 450], qt: false },
+  { code: "SDJ", sectors: [375, 450], qt: false },
+  { code: "ALA", sectors: [430, 400], qt: false },
+  { code: "CTS", sectors: [410, 490], qt: false },
+  { code: "RUH", sectors: [500, 430], qt: false }
 ];
 
 const LAYOVER_DED_HOURS = 0.25; // 15 minutes
 const LAYOVER_RATES = { "24": 24, "48": 48, "72": 72 };
-const BI_RATE = { 'none': 100, '1': 90, '2+': 0 }; // Sick leave → bonus rate THB/hr
+const BI_RATE = { 'none': 100, '1': 90, '2+': 0 };
 
 /* ---------- STATE ---------- */
 let chosen = [];           // {code, sectors[min,min], layover:'24'|'48'|'72'|'QT', sectorOps:[bool,bool], _rowId}
@@ -302,16 +319,15 @@ function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function totalBlockMinutes(sectors){ return (sectors?.[0]||0) + (sectors?.[1]||0); }
 function sortedFlights(){ return [...FLIGHTS].sort((a,b)=> totalBlockMinutes(a.sectors) - totalBlockMinutes(b.sectors) ); }
-function optionLabel(f){
-  const mins = totalBlockMinutes(f.sectors);
-  return `${f.code} — ${minutesToHMM(mins)} · 2 sectors`;
-}
+
+/* SHOW ONLY THE CODE IN THE DROPDOWN */
+function optionLabel(f){ return f.code; }
 
 /* ---------- PAY FORMULA ---------- */
 function layoverBaht(code, layoverKey){
-  if (code === 'DEL') return 0; // quickturn; no layover
+  if (code === 'DEL') return 0;
   const hours = LAYOVER_RATES[layoverKey] || 24;
-  const billable = Math.max(0, hours - LAYOVER_DED_HOURS); // minus 0:15
+  const billable = Math.max(0, hours - LAYOVER_DED_HOURS);
   return billable * 120;
 }
 
@@ -321,21 +337,19 @@ function rowAllowance(entry){
   const sectorMins = entry.sectors || [0,0];
   const totalMins = totalBlockMinutes(sectorMins);
 
-  // OP minutes (bonus based on OP only)
   const ops = entry.sectorOps || [true, true];
   const operatingMins = (ops[0] ? sectorMins[0] : 0) + (ops[1] ? sectorMins[1] : 0);
 
   const basePay = (totalMins/60) * 250;
 
-  // Sick Leave → bonus rate per OP hour
   const bonusRate = BI_RATE[sickMode] ?? 100;
   const bonus   = (operatingMins/60) * bonusRate;
 
-  // ✅ Sector allowance only for OP sectors
+  /* Sector allowance only for OP sectors */
   const perSector = isPur ? 500 : 300;
   const sectorAllowance = (ops[0] ? perSector : 0) + (ops[1] ? perSector : 0);
 
-  // Transport paid for both sectors (unchanged)
+  /* Transport paid for both sectors (unchanged) */
   const transport = 2 * (isPur ? 400 : 350);
 
   const lay = layoverBaht(entry.code, entry.layover);
@@ -390,7 +404,7 @@ function compute(){
     '2+': 'Bonus incentive rate: 0 THB (no BI)'
   };
   document.getElementById('sickInfo').textContent = sickMapText[sickMode] || sickMapText['none'];
-  document.getElementById('deductNote').textContent = ''; // not used in new scheme
+  document.getElementById('deductNote').textContent = '';
 
   renderSummary();
 }
@@ -408,9 +422,9 @@ function upsertEntry(rowId, code, lay){
   removeEntryByRow(rowId);
   chosen.push({
     code: f.code,
-    sectors: [...f.sectors],           // minutes
-    layover: lay,                      // '24'|'48'|'72' or 'QT'
-    sectorOps: [true,true],            // default both OP
+    sectors: [...f.sectors],
+    layover: lay,                   // '24'|'48'|'72'|'QT'
+    sectorOps: [true,true],         // default both OP
     _rowId: rowId
   });
   compute();
