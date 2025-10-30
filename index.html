@@ -109,10 +109,7 @@ select.flight-select option{ text-align:center; }
   cursor:pointer; user-select:none;
   white-space:nowrap;
 }
-.chip.active{ /* no red border; just slightly darker pill for OP */
-  border-color:var(--line);
-  background: #ececec; /* light, still subtle */
-}
+.chip.active{ border-color:var(--line); background:#ececec; }
 .info-icon{
   width:18px;height:18px;border-radius:50%;
   border:1px solid var(--line);
@@ -245,7 +242,7 @@ input:checked + .slider:before{transform:translateX(24px)}
         <span id="sickInfo" class="smallnote"></span>
       </div>
 
-      <p class="smallnote">Tip: add flights one by one. DEL becomes <b>Quickturn</b>; others use <b>Layover</b> 24/48/72H. Use OP/DH to mark deadhead if needed.</p>
+      <p class="smallnote">Tip: add flights one by one. DEL becomes <b>Quickturn</b>; others use <b>Layover</b> 24/48/72H or Quickturn. Use OP/DH to mark deadhead if needed.</p>
     </section>
 
     <div id="captureArea">
@@ -309,7 +306,7 @@ const FLIGHTS = [
 ];
 
 const LAYOVER_DED_HOURS = 0.25; // 15 minutes
-const LAYOVER_RATES = { "24": 24, "48": 48, "72": 72 };
+const LAYOVER_RATES = { "24": 24, "48": 48, "72": 72 }; // hours
 const BI_RATE = { 'none': 100, '1': 90, '2+': 0 };
 
 /* ---------- STATE ---------- */
@@ -328,7 +325,9 @@ function optionLabel(f){ return f.code; } // only code in dropdown
 
 /* ---------- PAY FORMULA ---------- */
 function layoverBaht(code, layoverKey){
-  if (code === 'DEL') return 0; // quickturn; no layover
+  // Quickturn → no layover
+  if (layoverKey === 'QT') return 0;
+  if (code === 'DEL') return 0; // safety: DEL is inherent quickturn
   const hours = LAYOVER_RATES[layoverKey] || 24;
   const billable = Math.max(0, hours - LAYOVER_DED_HOURS); // minus 0:15
   return billable * 120;
@@ -460,7 +459,11 @@ function addSelectorRow(parent){
 
   const layoverSelect = document.createElement('select');
   layoverSelect.className = 'layover-select';
-  layoverSelect.innerHTML = '<option value="24">24H</option><option value="48">48H</option><option value="72">72H</option>';
+  layoverSelect.innerHTML = `
+    <option value="24">24H</option>
+    <option value="48">48H</option>
+    <option value="72">72H</option>
+    <option value="QT">Quickturn</option>`;
   layoverSelect.value = '24';
   layoverSelect.style.display = 'none';
 
@@ -469,7 +472,7 @@ function addSelectorRow(parent){
   quickturn.textContent = 'Quickturn';
   quickturn.style.display = 'none';
 
-  /* OP/DH chips (default both OP) + info (subtle style) */
+  /* OP/DH chips (default both OP) + info (subtle) */
   const opsWrap = document.createElement('div');
   opsWrap.className = 'ops-toggle';
   opsWrap.style.display = 'none';
@@ -544,7 +547,7 @@ function addSelectorRow(parent){
 
     resetChipsToOP(); // reset toggles on change
 
-    if(f.qt){ // DEL quickturn
+    if(f.qt){ // DEL quickturn (fixed)
       layLabel.style.display='none';
       layoverSelect.style.display='none';
       quickturn.style.display='inline-block';
@@ -555,6 +558,7 @@ function addSelectorRow(parent){
       layLabel.style.display='inline-block';
       layoverSelect.style.display='inline-block';
       updateOpsVisibility(code);
+      // keep current layover choice (default 24H)
       upsertEntry(rowId, code, layoverSelect.value || '24');
     }
   });
@@ -563,8 +567,17 @@ function addSelectorRow(parent){
     const code = select.value;
     if(!code) return;
     const f = FLIGHTS.find(x => x.code === code);
-    if(!f || f.qt) return;
-    upsertEntry(rowId, code, layoverSelect.value || '24');
+    if(!f || f.qt) return; // no layover change for fixed quickturn flights (DEL)
+    const val = layoverSelect.value || '24';
+
+    if (val === 'QT'){
+      layLabel.style.display='none';
+      quickturn.style.display='inline-block';
+    } else {
+      quickturn.style.display='none';
+      layLabel.style.display='inline-block';
+    }
+    upsertEntry(rowId, code, val);
   });
 
   delBtn.addEventListener('click', () => {
