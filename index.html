@@ -527,13 +527,14 @@ function addSelectorRow(parent){
   delBtn.textContent = '×';
 
   function resetChipsToOP(){
-    [chip1, chip2].forEach((chip, i) => {
-      chip.classList.add('active');
-      chip.textContent = `S${i+1}: OP`;
-      chip.title = CHIP_TIP;
-      chip.setAttribute('aria-label', CHIP_TIP);
-    });
-  }
+  const LABELS = ['Out','In'];
+  [chip1, chip2].forEach((chip, i) => {
+    chip.classList.add('active');
+    chip.textContent = `${LABELS[i]}: OP`;
+    chip.title = CHIP_TIP;
+    chip.setAttribute('aria-label', CHIP_TIP);
+  });
+}
 
   function updateOpsVisibility(code){
     opsWrap.style.display = code ? 'flex' : 'none';
