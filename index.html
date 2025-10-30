@@ -114,7 +114,11 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
 .summary-item .count{color:var(--muted);font-weight:600}
 .summary-item .amount{white-space:nowrap}
 
-/* ---------- MOBILE TWEAKS ---------- */
+/* --- Better spacing for stacked flight selectors (mobile-first) --- */
+.selector-grid { display:flex; flex-direction:column; gap:10px; }
+.selector-row { padding:4px 0; }
+
+/* Subtle divider on mobile (faint for dark mode too) */
 @media (max-width:560px){
   .brand h1{font-size:16px}
   .kpis{grid-template-columns:1fr}
@@ -122,10 +126,16 @@ select{appearance:none;background:var(--card) url('data:image/svg+xml;utf8,<svg 
   .btn{width:100%}
   .value{font-size:26px}
   .summary-grid{grid-template-columns:1fr}
+
   .selector-row .layover-select{
     font-size:12px;
     min-width:90px;
     padding:6px 18px 6px 10px;
+  }
+
+  .selector-row + .selector-row{
+    border-top:1px dashed rgba(107,114,128,0.4); /* ~40% opacity muted gray */
+    padding-top:8px;
   }
 }
 
@@ -315,7 +325,6 @@ function renderSummary(){
     groups[key].count += 1;
     groups[key].subtotal += rowAllowance(it);
   });
-  Object.values(groups).sort((a,b)=>parseBlockToMinutes(a.code||0)-parseBlockToMinutes(b.code||0)); // no-op but stable
   Object.values(groups).sort((a,b)=>a.code.localeCompare(b.code)).forEach(g => {
     const div = document.createElement('div');
     div.className = 'summary-item';
@@ -338,11 +347,11 @@ function compute(){
   if(sickMode==='1') deduction = Math.round(hours * 10);
   else if(sickMode==='2+') deduction = Math.round(hours * 100);
   const finalAllowance = Math.max(0, totalAllowance - deduction);
-  $('#totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
-  $('#totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
+  document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
+  document.getElementById('totalAllowance').textContent = new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(finalAllowance) + ' THB';
   const sickMap = { 'none':'No sick leave', '1':'1 day sick leave', '2+':'2 days + sick leave' };
-  $('#sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
-  $('#deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
+  document.getElementById('sickInfo').textContent = sickMap[sickMode] + (deduction>0 ? ` — deduction: -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '');
+  document.getElementById('deductNote').textContent = deduction>0 ? `Includes sick-leave deduction of -${new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(deduction)} THB` : '';
   renderSummary();
 }
 
@@ -462,14 +471,17 @@ async function saveAsPicture(){
         if (!blob) return reject(new Error('Canvas toBlob failed.'));
         const file = new File([blob], 'snax-allowance.png', { type: 'image/png' });
 
+        // Try native share first
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({ files: [file], title: 'Snax Allowance', text: 'Selected flights & totals' });
             return resolve();
-          } catch (e) {}
+          } catch (e) {
+            // user canceled; fall through to download
+          }
         }
 
-        // Fallback: download (iOS opens a new tab to long-press Save Image)
+        // Fallback: download (iOS opens new tab; long-press to save)
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
