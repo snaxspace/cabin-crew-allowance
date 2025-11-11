@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>✈️ Snax Cabin Crew Allowance Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- 🧭 SNAX App Icon & Manifest (tidy, after fonts/meta) -->
+<link rel="apple-touch-icon" sizes="180x180" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="120x120" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://snaxspace.github.io/cabin-crew-allowance/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="https://snaxspace.github.io/cabin-crew-allowance/icons/icon-512.png">
+<link rel="manifest" href="https://snaxspace.github.io/cabin-crew-allowance/manifest.json">
+<meta name="theme-color" content="#DA0D18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Snax Cabin Crew Allowance">
+
 <style>
 /* ---------- THEME TOKENS ---------- */
 :root{
@@ -196,15 +210,6 @@ input:checked + .slider{background:#111827;border-color:#0b0c10}
 .slider:before{will-change:transform}
 input:checked + .slider:before{transform:translateX(24px)}
 .footer{color:var(--muted);border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
-<!-- 🧭 SNAX App Icon & Manifest -->
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#DA0D18">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Snax Cabin Crew Allowance">
 </style>
 </head>
 <body>
@@ -420,7 +425,7 @@ function compute(){
   document.getElementById('totalAllowance').textContent =
     new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(Math.round(totalAllowance)) + ' THB';
 
-  // (Removed sickInfo line per your request)
+  // (we intentionally do not show the BI line; logic still applied)
   document.getElementById('deductNote').textContent = '';
 
   renderSummary();
