@@ -123,7 +123,11 @@ select.flight-select option{ text-align:center; }
   cursor:pointer; user-select:none;
   white-space:nowrap;
 }
-.chip.active{ border-color:var(--line); background:#ececec; }
+.chip.active{
+  border-color:var(--line);
+  background:var(--pill); /* stay dark in dark mode */
+  color:var(--text);      /* white in dark mode, black in light mode */
+}
 .info-icon{
   width:18px;height:18px;border-radius:50%;
   border:1px solid var(--line);
