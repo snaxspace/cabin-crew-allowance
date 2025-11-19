@@ -110,7 +110,7 @@ select.flight-select option{ text-align:center; }
 .selector-row .lay-label.small{font-size:12px;color:var(--muted)}
 .pill{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
 
-/* OP/DH chips (subtle, no red border) + info icon */
+/* OP/DH chips (subtle) + info icon */
 .ops-toggle{ display:flex; align-items:center; gap:6px; margin-left:2px; flex:0 0 auto; }
 .chip{
   border:1px solid var(--line);
@@ -120,6 +120,7 @@ select.flight-select option{ text-align:center; }
   background:var(--pill);
   cursor:pointer; user-select:none;
   white-space:nowrap;
+  color:var(--text);
 }
 .chip.active{
   border-color:var(--line);
@@ -135,7 +136,7 @@ select.flight-select option{ text-align:center; }
   flex:0 0 auto;
 }
 
-/* Delete “×” pinned at far right, always visible */
+/* Delete “×” button */
 .selector-row .spacer{flex:1 0 auto}
 .selector-row .del{
   background:transparent;
@@ -148,7 +149,7 @@ select.flight-select option{ text-align:center; }
 }
 .selector-row .del:hover{border-color:#cfcfcf;color:#666}
 
-/* Add button */
+/* Buttons */
 .btn{background:var(--btn);color:var(--btn-text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:700;min-width:160px}
 .btn:hover{border-color:#ccc}
 .btn.small{padding:10px 12px;font-size:14px}
@@ -167,7 +168,7 @@ select.flight-select option{ text-align:center; }
 .summary-item .count{color:var(--muted);font-weight:600}
 .summary-item .amount{white-space:nowrap}
 
-/* Stack space between rows */
+/* Stack of selector rows */
 .selector-grid { display:flex; flex-direction:column; gap:10px; }
 
 /* --------- COMPACT RULES for phones + tablets (≤820px) --------- */
@@ -211,6 +212,37 @@ input:checked + .slider{background:#111827;border-color:#0b0c10}
 .slider:before{will-change:transform}
 input:checked + .slider:before{transform:translateX(24px)}
 .footer{color:var(--muted);border-top:1px solid var(--line);padding:12px 0;margin-top:8px;text-align:center;font-size:12px}
+
+/* ---------- Install hint & help ---------- */
+.install-hint{
+  display:none;
+  border:1px dashed var(--line);
+  border-radius:12px;
+  padding:10px 12px;
+  background:var(--card);
+  font-size:13px;
+  margin-top:10px;
+}
+.install-hint strong{font-weight:700;}
+.install-hint button{
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  margin-left:auto;
+}
+.help-link{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--red);
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  text-decoration:underline;
+}
 </style>
 </head>
 <body>
@@ -235,12 +267,33 @@ input:checked + .slider:before{transform:translateX(24px)}
           </select>
         </div>
 
+        <!-- Dark Mode Toggle -->
         <div style="display:flex;align-items:center;gap:10px;">
           <label class="small" for="darkToggle">Dark mode:</label>
           <label class="switch" title="Toggle dark mode">
             <input type="checkbox" id="darkToggle">
             <span class="slider"></span>
           </label>
+        </div>
+      </div>
+
+      <!-- Permanent help link under rank -->
+      <button id="installHelpToggle" class="help-link" type="button">
+        How to add this app to your Home Screen?
+      </button>
+      <div id="installHelpText" class="smallnote" style="display:none;margin-top:4px;">
+        On iPhone, open this page in Safari → Share → “Add to Home Screen” to install Crew Allowance app.
+      </div>
+
+      <!-- Dismissible first-time hint (iOS Safari only) -->
+      <div id="installHint" class="install-hint">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="font-size:18px;line-height:1.1;">📲</div>
+          <div style="flex:1;">
+            <strong>First time here?</strong><br>
+            Add Crew Allowance to your Home Screen from Safari so it lives on your phone like a normal app.
+          </div>
+          <button type="button" id="installHintClose">Got it</button>
         </div>
       </div>
     </section>
@@ -323,15 +376,15 @@ const FLIGHTS = [
   { code: "HRB", sectors: [350, 390], qt: false }, // 5:50, 6:30
   { code: "NGO", sectors: [345, 405], qt: false }, // 5:45, 6:45
   { code: "NRT", sectors: [370, 450], qt: false }, // 6:10, 7:30
+  { code: "CTS", sectors: [410, 392], qt: false }, // 6:50, 6:32
   { code: "SDJ", sectors: [375, 450], qt: false }, // 6:15, 7:30
   { code: "ALA", sectors: [430, 400], qt: false }, // 7:10, 6:40
-  { code: "CTS", sectors: [410, 392], qt: false }, // 6:50, 6:32
-  { code: "RUH", sectors: [400, 430], qt: false } // 6:40, 7:10
+  { code: "RUH", sectors: [400, 430], qt: false }  // 6:40, 7:10
 ];
 
 const LAYOVER_DED_HOURS = 0.25; // 15 minutes
 
-// Raw hours for each layover label (before deduction)
+// Base hours by label (before special handling)
 const LAYOVER_BASE_HOURS = {
   "24": 24,
   "44": 44,
@@ -343,7 +396,7 @@ const LAYOVER_BASE_HOURS = {
 const BI_RATE = { 'none': 100, '1': 90, '2+': 0 };
 
 /* ---------- STATE ---------- */
-let chosen = [];           // {code, sectors[min,min], layover:'24'|'44'|'48'|'51'|'72'|'QT', sectorOps:[bool,bool], _rowId}
+let chosen = [];           // {code, sectors[min,min], layover:'24'|'48'|'72'|'44'|'51'|'QT', sectorOps:[bool,bool], _rowId}
 let rowCounter = 0;
 let sickMode = 'none';
 let rankMode = 'CC';
@@ -358,14 +411,24 @@ function optionLabel(f){ return f.code; }
 
 /* ---------- PAY FORMULA ---------- */
 function layoverBaht(code, layoverKey){
+  // Quickturn → no layover allowance
   if (layoverKey === 'QT') return 0;
   if (code === 'DEL') return 0;
 
-  let hours = LAYOVER_BASE_HOURS[layoverKey];
-  if (hours == null) hours = 24;
+  let hours;
 
-  const billable = Math.max(0, hours - LAYOVER_DED_HOURS); // 15 min off all layovers
-  return billable * 120;
+  // Special fixed billed hours for KIX 44H and 51H
+  if (layoverKey === '44') {
+    hours = 44.25;   // 44h 15m
+  } else if (layoverKey === '51') {
+    hours = 51.5;    // 51h 30m
+  } else {
+    // Standard rule: base hours minus 15 minutes
+    const base = LAYOVER_BASE_HOURS[layoverKey] ?? 24;
+    hours = Math.max(0, base - LAYOVER_DED_HOURS);
+  }
+
+  return hours * 120;
 }
 
 function rowAllowance(entry){
@@ -434,7 +497,6 @@ function compute(){
     new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(Math.round(totalAllowance)) + ' THB';
 
   document.getElementById('deductNote').textContent = '';
-
   renderSummary();
 }
 
@@ -479,32 +541,6 @@ function addSelectorRow(parent){
   const layoverSelect = document.createElement('select');
   layoverSelect.className = 'layover-select';
   layoverSelect.style.display = 'none';
-
-  function buildLayoverOptionsForFlight(code) {
-    const opts = [
-      { value: '24', label: '24H' },
-      { value: '48', label: '48H' },
-      { value: '72', label: '72H' },
-      { value: 'QT', label: 'Quickturn' }
-    ];
-
-if (code === 'KIX') {
-  opts.splice(1, 0,                     // insert *after* 24H
-    { value: '44', label: '44H' },
-    { value: '48', label: '48H' },      // move 48H here
-    { value: '51', label: '51H' }
-  );
-  // remove the original 48H from its old location
-  opts.splice(4, 1);
-}
-
-
-    layoverSelect.innerHTML = opts
-      .map(o => `<option value="${o.value}">${o.label}</option>`)
-      .join('');
-
-    layoverSelect.value = '24';
-  }
 
   const quickturn = document.createElement('span');
   quickturn.className = 'pill';
@@ -571,6 +607,32 @@ if (code === 'KIX') {
     opsWrap.style.display = code ? 'flex' : 'none';
   }
 
+  function buildLayoverOptionsForFlight(code) {
+    const baseOpts = [
+      { value: '24', label: '24H' },
+      { value: '48', label: '48H' },
+      { value: '72', label: '72H' },
+      { value: 'QT', label: 'Quickturn' }
+    ];
+
+    let opts = baseOpts;
+    if (code === 'KIX') {
+      opts = [
+        { value: '24', label: '24H' },
+        { value: '44', label: '44H' },
+        { value: '48', label: '48H' },
+        { value: '51', label: '51H' },
+        { value: '72', label: '72H' },
+        { value: 'QT', label: 'Quickturn' }
+      ];
+    }
+
+    layoverSelect.innerHTML = opts
+      .map(o => `<option value="${o.value}">${o.label}</option>`)
+      .join('');
+    layoverSelect.value = '24';
+  }
+
   select.addEventListener('change', () => {
     const code = select.value;
     if(!code){
@@ -586,7 +648,7 @@ if (code === 'KIX') {
 
     resetChipsToOP();
 
-    if(f.qt){
+    if(f.qt){ // DEL quickturn
       layLabel.style.display='none';
       layoverSelect.style.display='none';
       quickturn.style.display='inline-block';
@@ -668,10 +730,48 @@ async function saveAsPicture(){
   }
 }
 
+/* ---------- INSTALL HINT & HELP ---------- */
+function showInstallHintIfNeeded(){
+  const hint = document.getElementById('installHint');
+  const closeBtn = document.getElementById('installHintClose');
+  if (!hint) return;
+
+  if (localStorage.getItem('snax_install_hint_dismissed') === '1') {
+    hint.style.display = 'none';
+    return;
+  }
+
+  const ua = window.navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isStandalone = window.navigator.standalone === true;
+
+  if (isIOS && !isStandalone) {
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
+  }
+
+  if (closeBtn){
+    closeBtn.addEventListener('click', () => {
+      hint.style.display = 'none';
+      localStorage.setItem('snax_install_hint_dismissed', '1');
+    });
+  }
+}
+
 /* ---------- INIT ---------- */
 function updateRankDisplay(){
   const el = document.getElementById('rankDisplay');
   if(el){ el.textContent = 'Rank: ' + rankMode + ' — (Base salary not included)'; }
+}
+
+function refreshFlightOptionLabels(){
+  document.querySelectorAll('#selectors .selector-row select.flight-select').forEach(sel => {
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Select a flight…</option>' +
+      sortedFlights().map(f => `<option value="${f.code}">${optionLabel(f)}</option>`).join('');
+    sel.value = current;
+  });
 }
 
 function renderSelectors(startCount){
@@ -694,6 +794,7 @@ function init(){
   rSel.addEventListener('change', () => {
     rankMode = rSel.value;
     updateRankDisplay();
+    refreshFlightOptionLabels();
     compute();
   });
 
@@ -706,9 +807,20 @@ function init(){
     document.documentElement.setAttribute('data-theme', darkToggle.checked ? 'dark' : 'light');
   });
 
+  const helpToggle = document.getElementById('installHelpToggle');
+  const helpText = document.getElementById('installHelpText');
+  if (helpToggle && helpText){
+    helpToggle.addEventListener('click', () => {
+      const visible = helpText.style.display === 'block';
+      helpText.style.display = visible ? 'none' : 'block';
+    });
+  }
+
   rankMode = rSel.value;
   sickMode = sSel.value;
   updateRankDisplay();
+  refreshFlightOptionLabels();
+  showInstallHintIfNeeded();
 }
 
 document.addEventListener('DOMContentLoaded', init);
