@@ -95,12 +95,10 @@ select.flight-select option{ text-align:center; }
 /* One-line compact selector rows */
 .selector-row{
   display:flex; align-items:center; gap:6px; width:100%;
-  flex-wrap:nowrap; overflow-x:hidden; /* keep inside */
+  flex-wrap:nowrap; overflow-x:hidden;
   padding:4px 0;
 }
-/* Flight grows, can shrink on mobile/tablet */
 .selector-row .flight-select{ flex:1 1 50%; min-width:120px; }
-/* Layover compact */
 .selector-row .layover-select{
   flex:0 0 auto;
   padding:6px 18px 6px 8px;
@@ -125,8 +123,8 @@ select.flight-select option{ text-align:center; }
 }
 .chip.active{
   border-color:var(--line);
-  background:var(--pill); /* stay dark in dark mode */
-  color:var(--text);      /* white in dark mode, black in light mode */
+  background:var(--pill);
+  color:var(--text);
 }
 .info-icon{
   width:18px;height:18px;border-radius:50%;
@@ -185,11 +183,10 @@ select.flight-select option{ text-align:center; }
   .selector-row .flight-select{
     flex:1 1 38%;
     min-width:0;
-    max-width:44vw;                /* ensure × stays visible */
+    max-width:44vw;
     padding:8px 20px 8px 10px;
   }
 
-  /* Hide "Layover:" label at these sizes (and JS hides it for Quickturn) */
   .selector-row .lay-label{ display:none !important; }
 
   .selector-row .layover-select{
@@ -200,7 +197,7 @@ select.flight-select option{ text-align:center; }
 
   .ops-toggle{ gap:3px; }
   .ops-toggle .chip{ padding:1px 5px; font-size:9.5px; }
-  .ops-toggle .info-icon{ display:none; }  /* extra room */
+  .ops-toggle .info-icon{ display:none; }
 
   .selector-row .del{ width:24px; height:24px; }
 }
@@ -238,7 +235,6 @@ input:checked + .slider:before{transform:translateX(24px)}
           </select>
         </div>
 
-        <!-- Dark Mode Toggle -->
         <div style="display:flex;align-items:center;gap:10px;">
           <label class="small" for="darkToggle">Dark mode:</label>
           <label class="switch" title="Toggle dark mode">
@@ -334,11 +330,20 @@ const FLIGHTS = [
 ];
 
 const LAYOVER_DED_HOURS = 0.25; // 15 minutes
-const LAYOVER_RATES = { "24": 24, "48": 48, "72": 72 }; // hours
+
+// Raw hours for each layover label (before deduction)
+const LAYOVER_BASE_HOURS = {
+  "24": 24,
+  "44": 44,
+  "48": 48,
+  "51": 51,
+  "72": 72
+};
+
 const BI_RATE = { 'none': 100, '1': 90, '2+': 0 };
 
 /* ---------- STATE ---------- */
-let chosen = [];           // {code, sectors[min,min], layover:'24'|'48'|'72'|'QT', sectorOps:[bool,bool], _rowId}
+let chosen = [];           // {code, sectors[min,min], layover:'24'|'44'|'48'|'51'|'72'|'QT', sectorOps:[bool,bool], _rowId}
 let rowCounter = 0;
 let sickMode = 'none';
 let rankMode = 'CC';
@@ -349,15 +354,17 @@ function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function totalBlockMinutes(sectors){ return (sectors?.[0]||0) + (sectors?.[1]||0); }
 function sortedFlights(){ return [...FLIGHTS].sort((a,b)=> totalBlockMinutes(a.sectors) - totalBlockMinutes(b.sectors) ); }
-function optionLabel(f){ return f.code; } // only code in dropdown
+function optionLabel(f){ return f.code; }
 
 /* ---------- PAY FORMULA ---------- */
 function layoverBaht(code, layoverKey){
-  // Quickturn → no layover allowance
   if (layoverKey === 'QT') return 0;
-  if (code === 'DEL') return 0; // safety (DEL is inherent quickturn)
-  const hours = LAYOVER_RATES[layoverKey] || 24;
-  const billable = Math.max(0, hours - LAYOVER_DED_HOURS); // minus 0:15
+  if (code === 'DEL') return 0;
+
+  let hours = LAYOVER_BASE_HOURS[layoverKey];
+  if (hours == null) hours = 24;
+
+  const billable = Math.max(0, hours - LAYOVER_DED_HOURS); // 15 min off all layovers
   return billable * 120;
 }
 
@@ -367,21 +374,17 @@ function rowAllowance(entry){
   const sectorMins = entry.sectors || [0,0];
   const totalMins = totalBlockMinutes(sectorMins);
 
-  // OP/DH per sector
   const ops = entry.sectorOps || [true, true];
   const operatingMins = (ops[0] ? sectorMins[0] : 0) + (ops[1] ? sectorMins[1] : 0);
 
   const basePay = (totalMins/60) * 250;
 
-  // Sick Leave → BI rate per OP hour (hidden text; still applied)
   const bonusRate = BI_RATE[sickMode] ?? 100;
   const bonus   = (operatingMins/60) * bonusRate;
 
-  // Sector allowance only for OP sectors
   const perSector = isPur ? 500 : 300;
   const sectorAllowance = (ops[0] ? perSector : 0) + (ops[1] ? perSector : 0);
 
-  // Transport paid for both sectors
   const transport = 2 * (isPur ? 400 : 350);
 
   const lay = layoverBaht(entry.code, entry.layover);
@@ -430,7 +433,6 @@ function compute(){
   document.getElementById('totalAllowance').textContent =
     new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(Math.round(totalAllowance)) + ' THB';
 
-  // (we intentionally do not show the BI line; logic still applied)
   document.getElementById('deductNote').textContent = '';
 
   renderSummary();
@@ -450,20 +452,14 @@ function upsertEntry(rowId, code, lay){
   chosen.push({
     code: f.code,
     sectors: [...f.sectors],
-    layover: lay,                      // '24'|'48'|'72'|'QT'
-    sectorOps: [true,true],            // default both OP
+    layover: lay,
+    sectorOps: [true,true],
     _rowId: rowId
   });
   compute();
 }
 
 /* ---------- SELECTORS ---------- */
-function renderSelectors(startCount){
-  const wrap = document.getElementById('selectors'); 
-  wrap.innerHTML='';
-  for(let i=0;i<startCount;i++){ addSelectorRow(wrap); }
-}
-
 function addSelectorRow(parent){
   const rowId = ++rowCounter;
   const row = document.createElement('div');
@@ -482,20 +478,35 @@ function addSelectorRow(parent){
 
   const layoverSelect = document.createElement('select');
   layoverSelect.className = 'layover-select';
-  layoverSelect.innerHTML = `
-    <option value="24">24H</option>
-    <option value="48">48H</option>
-    <option value="72">72H</option>
-    <option value="QT">Quickturn</option>`;
-  layoverSelect.value = '24';
   layoverSelect.style.display = 'none';
+
+  function buildLayoverOptionsForFlight(code) {
+    const opts = [
+      { value: '24', label: '24H' },
+      { value: '48', label: '48H' },
+      { value: '72', label: '72H' },
+      { value: 'QT', label: 'Quickturn' }
+    ];
+
+    if (code === 'KIX') {
+      opts.splice(2, 0,
+        { value: '44', label: '44H' },
+        { value: '51', label: '51H' }
+      );
+    }
+
+    layoverSelect.innerHTML = opts
+      .map(o => `<option value="${o.value}">${o.label}</option>`)
+      .join('');
+
+    layoverSelect.value = '24';
+  }
 
   const quickturn = document.createElement('span');
   quickturn.className = 'pill';
   quickturn.textContent = 'Quickturn';
   quickturn.style.display = 'none';
 
-  /* OP/DH chips (default both OP) + info (subtle) */
   const opsWrap = document.createElement('div');
   opsWrap.className = 'ops-toggle';
   opsWrap.style.display = 'none';
@@ -503,20 +514,20 @@ function addSelectorRow(parent){
 
   function makeChip(label, idx){
     const chip = document.createElement('span');
-    chip.className = 'chip active'; // active = OP (subtle)
+    chip.className = 'chip active';
     chip.dataset.idx = String(idx);
     chip.textContent = `${label}: OP`;
     chip.title = CHIP_TIP;
     chip.setAttribute('aria-label', CHIP_TIP);
     chip.addEventListener('click', () => {
       const i = Number(chip.dataset.idx);
-      const nowActive = chip.classList.toggle('active'); // true if OP, false if DH
+      const nowActive = chip.classList.toggle('active');
       chip.textContent = `${label}: ${nowActive ? 'OP' : 'DH'}`;
       const entry = chosen.find(x => x._rowId === rowId);
       if (entry){
         entry.sectorOps = entry.sectorOps || [true,true];
-        entry.sectorOps[i] = nowActive; // true=OP, false=DH
-        compute(); // bonus + sector allowance update
+        entry.sectorOps[i] = nowActive;
+        compute();
       }
     });
     return chip;
@@ -569,15 +580,16 @@ function addSelectorRow(parent){
     const f = FLIGHTS.find(x => x.code === code);
     if(!f) return;
 
-    resetChipsToOP(); // reset toggles on change
+    resetChipsToOP();
 
-    if(f.qt){ // DEL quickturn (fixed)
+    if(f.qt){
       layLabel.style.display='none';
       layoverSelect.style.display='none';
       quickturn.style.display='inline-block';
       updateOpsVisibility(code);
       upsertEntry(rowId, code, 'QT');
     } else {
+      buildLayoverOptionsForFlight(code);
       quickturn.style.display='none';
       layLabel.style.display='inline-block';
       layoverSelect.style.display='inline-block';
@@ -590,12 +602,11 @@ function addSelectorRow(parent){
     const code = select.value;
     if(!code) return;
     const f = FLIGHTS.find(x => x.code === code);
-    if(!f || f.qt) return; // DEL fixed quickturn
+    if(!f || f.qt) return;
 
     const val = layoverSelect.value || '24';
 
     if (val === 'QT'){
-      // For non-DEL: hide label and keep pill hidden
       layLabel.style.display='none';
       quickturn.style.display='none';
     } else {
@@ -659,15 +670,6 @@ function updateRankDisplay(){
   if(el){ el.textContent = 'Rank: ' + rankMode + ' — (Base salary not included)'; }
 }
 
-function refreshFlightOptionLabels(){
-  document.querySelectorAll('#selectors .selector-row select.flight-select').forEach(sel => {
-    const current = sel.value;
-    sel.innerHTML = '<option value="">Select a flight…</option>' +
-      sortedFlights().map(f => `<option value="${f.code}">${optionLabel(f)}</option>`).join('');
-    sel.value = current;
-  });
-}
-
 function renderSelectors(startCount){
   const wrap = document.getElementById('selectors'); 
   wrap.innerHTML='';
@@ -688,7 +690,6 @@ function init(){
   rSel.addEventListener('change', () => {
     rankMode = rSel.value;
     updateRankDisplay();
-    refreshFlightOptionLabels();
     compute();
   });
 
@@ -704,7 +705,6 @@ function init(){
   rankMode = rSel.value;
   sickMode = sSel.value;
   updateRankDisplay();
-  refreshFlightOptionLabels();
 }
 
 document.addEventListener('DOMContentLoaded', init);
