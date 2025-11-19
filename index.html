@@ -488,12 +488,16 @@ function addSelectorRow(parent){
       { value: 'QT', label: 'Quickturn' }
     ];
 
-    if (code === 'KIX') {
-      opts.splice(2, 0,
-        { value: '44', label: '44H' },
-        { value: '51', label: '51H' }
-      );
-    }
+if (code === 'KIX') {
+  opts.splice(1, 0,                     // insert *after* 24H
+    { value: '44', label: '44H' },
+    { value: '48', label: '48H' },      // move 48H here
+    { value: '51', label: '51H' }
+  );
+  // remove the original 48H from its old location
+  opts.splice(4, 1);
+}
+
 
     layoverSelect.innerHTML = opts
       .map(o => `<option value="${o.value}">${o.label}</option>`)
