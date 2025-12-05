@@ -6,7 +6,7 @@
 <title>✈️ Snax Cabin Crew Allowance Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- 🧭 SNAX App Icon & Manifest (tidy, after fonts/meta) -->
+<!-- 🧭 SNAX App Icon & Manifest -->
 <link rel="apple-touch-icon" sizes="180x180" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="167x167" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="152x152" href="https://snaxspace.github.io/cabin-crew-allowance/apple-touch-icon.png">
@@ -79,11 +79,11 @@ select{
   min-width:200px;
 }
 
-/* Center the displayed value in flight selects */
+/* Center value in flight selects */
 select.flight-select{ text-align:center; text-align-last:center; }
 select.flight-select option{ text-align:center; }
 
-/* HERO: Flight selector emphasis (red ring) */
+/* HERO: Flight selector emphasis */
 .selector-row select.flight-select{
   border:2px solid var(--red);
   font-weight:700;
@@ -155,7 +155,7 @@ select.flight-select option{ text-align:center; }
 .btn.small{padding:10px 12px;font-size:14px}
 .btn.ghost{background:transparent;border:1px dashed var(--line);}
 
-/* ---------- SUMMARY LIST (COMPACT) ---------- */
+/* ---------- SUMMARY LIST ---------- */
 .summary-wrap{margin-top:8px}
 .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .summary-item{
@@ -171,7 +171,7 @@ select.flight-select option{ text-align:center; }
 /* Stack of selector rows */
 .selector-grid { display:flex; flex-direction:column; gap:10px; }
 
-/* --------- COMPACT RULES for phones + tablets (≤820px) --------- */
+/* --------- Responsive (≤820px) --------- */
 @media (max-width:820px){
   .brand h1{font-size:16px}
   .kpis{grid-template-columns:1fr}
@@ -299,7 +299,12 @@ input:checked + .slider:before{transform:translateX(24px)}
     </section>
 
     <section class="card">
-      <h2>Select Flights</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <h2 style="margin:0;">Select Flights</h2>
+        <button id="resetFlights" class="btn small" type="button" style="min-width:auto;padding:6px 10px;font-size:12px;">
+          Reset
+        </button>
+      </div>
 
       <div id="selectors" class="selector-grid"></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
@@ -608,20 +613,20 @@ function addSelectorRow(parent){
   }
 
   function buildLayoverOptionsForFlight(code) {
-    const baseOpts = [
-      { value: '24', label: '24H' },
-      { value: '48', label: '48H' },
-      { value: '72', label: '72H' },
-      { value: 'QT', label: 'Quickturn' }
-    ];
-
-    let opts = baseOpts;
+    let opts;
     if (code === 'KIX') {
       opts = [
         { value: '24', label: '24H' },
         { value: '44', label: '44H' },
         { value: '48', label: '48H' },
         { value: '51', label: '51H' },
+        { value: '72', label: '72H' },
+        { value: 'QT', label: 'Quickturn' }
+      ];
+    } else {
+      opts = [
+        { value: '24', label: '24H' },
+        { value: '48', label: '48H' },
         { value: '72', label: '72H' },
         { value: 'QT', label: 'Quickturn' }
       ];
@@ -759,6 +764,22 @@ function showInstallHintIfNeeded(){
   }
 }
 
+/* ---------- RESET ---------- */
+function resetAllFlights(){
+  chosen = [];
+  rowCounter = 0;
+
+  renderSelectors(1);
+
+  const sSel = document.getElementById('sickSelect');
+  if (sSel){
+    sSel.value = 'none';
+    sickMode = 'none';
+  }
+
+  compute();
+}
+
 /* ---------- INIT ---------- */
 function updateRankDisplay(){
   const el = document.getElementById('rankDisplay');
@@ -802,6 +823,11 @@ function init(){
     addSelectorRow(document.getElementById('selectors'));
   });
 
+  const resetBtn = document.getElementById('resetFlights');
+  if (resetBtn){
+    resetBtn.addEventListener('click', resetAllFlights);
+  }
+
   const darkToggle = document.getElementById('darkToggle');
   darkToggle.addEventListener('change', () => {
     document.documentElement.setAttribute('data-theme', darkToggle.checked ? 'dark' : 'light');
@@ -825,6 +851,7 @@ function init(){
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
