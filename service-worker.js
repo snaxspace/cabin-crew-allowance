@@ -1,10 +1,10 @@
-const CACHE_NAME = 'snax-allowance-v1';
+const CACHE_NAME = 'snax-allowance-v2';
 
 const URLS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './icons/apple-touch-icon.png',
+  './apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
@@ -18,7 +18,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activate: clean up old caches if we ever bump version
+// Activate: clean up old caches when version changes
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -31,14 +31,14 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch: try cache first, then network, then fall back to index.html
+// Fetch: cache-first, then network, also cache new GET responses
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) {
-        return response;
+    caches.match(event.request).then(cached => {
+      if (cached) {
+        return cached;
       }
       return fetch(event.request)
         .then(networkResponse => {
@@ -48,7 +48,10 @@ self.addEventListener('fetch', event => {
           });
           return networkResponse;
         })
-        .catch(() => caches.match('./index.html'));
+        .catch(() => {
+          // Last resort: serve cached index.html if available
+          return caches.match('./index.html');
+        });
     })
   );
 });
