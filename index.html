@@ -510,8 +510,11 @@ function compute(){
   });
 
   document.getElementById('totalHours').textContent = minutesToHMM(totalMinutes) + ' H';
-  document.getElementById('totalAllowance').textContent =
-    new Intl.NumberFormat('en-TH',{maximumFractionDigits:0}).format(Math.round(totalAllowance)) + ' THB';
+  const totalIncome = totalAllowance + (baseSalary || 0);
+
+document.getElementById('totalAllowance').textContent =
+  new Intl.NumberFormat('en-TH',{maximumFractionDigits:0})
+    .format(Math.round(totalIncome)) + ' THB';
 
   document.getElementById('deductNote').textContent = '';
   renderSummary();
