@@ -833,7 +833,13 @@ function init(){
     refreshFlightOptionLabels();
     compute();
   });
-
+  const baseInput = document.getElementById('baseSalaryInput');
+  if (baseInput){
+    baseInput.addEventListener('input', () => {
+      baseSalary = Number(baseInput.value || 0);
+      compute();
+    });
+  }
   document.getElementById('addFlightBtn').addEventListener('click', () => {
     addSelectorRow(document.getElementById('selectors'));
   });
