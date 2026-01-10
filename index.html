@@ -327,6 +327,17 @@ input:checked + .slider:before{transform:translateX(24px)}
     </section>
 
     <div id="captureArea">
+      <section class="card" style="padding:12px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <div style="font-weight:700;">Base Salary</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="smallnote">THB</span>
+      <input id="baseSalaryInput" inputmode="numeric" type="number" min="0" step="100"
+        placeholder="0"
+        style="width:160px;max-width:60vw;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:700;text-align:right;">
+    </div>
+  </div>
+</section>
       <section class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
           <h2 style="margin:0">Per-destination Summary</h2>
