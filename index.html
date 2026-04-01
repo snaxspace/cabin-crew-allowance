@@ -424,7 +424,13 @@ function $(s){ return document.querySelector(s); }
 function fmtTHB(n){ return new Intl.NumberFormat('en-TH', {maximumFractionDigits:0}).format(Math.round(n)) + ' THB'; }
 function minutesToHMM(mins){ const h=Math.floor(mins/60), m=mins%60; return h+':'+String(m).padStart(2,'0'); }
 function totalBlockMinutes(sectors){ return (sectors?.[0]||0) + (sectors?.[1]||0); }
-function sortedFlights(){ return [...FLIGHTS].sort((a,b)=> a.code.localeCompare(b.code));}
+function sortedFlights(){
+  return [...FLIGHTS].sort((a,b)=> {
+    if (a.code < b.code) return -1;
+    if (a.code > b.code) return 1;
+    return 0;
+  });
+}
 function optionLabel(f){ return f.code; }
 
 /* ---------- PAY FORMULA ---------- */
