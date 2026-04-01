@@ -386,19 +386,19 @@ input:checked + .slider:before{transform:translateX(24px)}
 <script>
 /* ---------- DATA (sector minutes; DEL is quickturn) ---------- */
 const FLIGHTS = [
-  { code: "DEL", sectors: [270, 245], qt: true },  // 4:30, 4:05
-  { code: "PVG", sectors: [255, 280], qt: false }, // 4:15, 4:40
-  { code: "ICN", sectors: [335, 370], qt: false }, // 5:35, 6:10
-  { code: "KIX", sectors: [345, 390], qt: false }, // 5:45, 6:30
-  { code: "HRB", sectors: [350, 390], qt: false }, // 5:50, 6:30
-  { code: "NGO", sectors: [345, 405], qt: false }, // 5:45, 6:45
-  { code: "NRT", sectors: [370, 450], qt: false }, // 6:10, 7:30
-  { code: "CTS", sectors: [410, 490], qt: false }, // 6:50, 8:10
-  { code: "SDJ", sectors: [375, 450], qt: false }, // 6:15, 7:30
-  { code: "ALA", sectors: [430, 400], qt: false }, // 7:10, 6:40
-  { code: "RUH", sectors: [500, 430], qt: false }  // 8:20, 7:10
+const FLIGHTS = [
+  { code: "ALA", sectors: [400, 410], qt: false }, // 6:40, 6:50
+  { code: "CTS", sectors: [430, 445], qt: false }, // 7:10, 7:25
+  { code: "DEL", sectors: [265, 255], qt: true  }, // 4:25, 4:15
+  { code: "HRB", sectors: [350, 390], qt: false }, // (kept old until you confirm)
+  { code: "ICN", sectors: [315, 340], qt: false }, // 5:15, 5:40
+  { code: "KIX", sectors: [355, 360], qt: false }, // 5:55, 6:00
+  { code: "NGO", sectors: [345, 405], qt: false }, // (kept old)
+  { code: "NRT", sectors: [390, 405], qt: false }, // 6:30, 6:45
+  { code: "PVG", sectors: [255, 245], qt: false }, // 4:15, 4:05
+  { code: "RUH", sectors: [500, 425], qt: false }, // 8:20, 7:05
+  { code: "SDJ", sectors: [395, 425], qt: false }  // 6:35, 7:05
 ];
-
 const LAYOVER_DED_HOURS = 0.25; // 15 minutes
 
 // Base hours by label (before special handling)
