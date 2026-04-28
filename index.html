@@ -513,7 +513,9 @@ function renderSummary(){
 function compute(){
   let totalMinutes=0, totalAllowance=0;
   chosen.forEach(it => {
-    totalMinutes += totalBlockMinutes(it.sectors);
+const ops = it.sectorOps || [true, true];
+if (ops[0]) totalMinutes += it.sectors[0]; // Out
+if (ops[1]) totalMinutes += it.sectors[1]; // In
     totalAllowance += rowAllowance(it);
   });
 
