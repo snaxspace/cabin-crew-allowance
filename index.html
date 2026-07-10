@@ -328,6 +328,7 @@ input:checked + .slider:before{transform:translateX(24px)}
           <option value="none" selected>No sick leave</option>
           <option value="1">1 day sick leave</option>
           <option value="2+">2 days + sick leave</option>
+          <option value="2admit">2+ days (admitted)</option>
         </select>
       </div>
 
@@ -410,7 +411,7 @@ const LAYOVER_BASE_HOURS = {
   "96": 96
 };
 
-const BI_RATE = { 'none': 100, '1': 90, '2+': 0 };
+const BI_RATE = { 'none': 100, '1': 90, '2admit': 60, '2+': 0 };
 
 /* ---------- STATE ---------- */
 let chosen = [];           // {code, sectors[min,min], layover:'24'|'48'|'72'|'44'|'51'|'QT', sectorOps:[bool,bool], _rowId}
